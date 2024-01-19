@@ -3,7 +3,7 @@ import csv
 ## End of Data
 # Input parameters to the districting problem
 no_dist=[2,10,30,40,50,100] # the number of districts
-probs=['CARP_F15_g_graph.dat','CARP_N17_g_graph.dat','CARP_K13_g_graph.dat','CARP_O12_g_graph.dat','CARP_S9_p_graph.dat','CARP_N16_g_graph.dat','CARP_S9_g_graph.dat','CARP_S11_g_graph.dat','CARP_K9_p_graph.dat','CARP_N9_g_graph.dat','CARP_N11_g_graph.dat','CARP_N15_g_graph.dat']
+probs=['CARP_F15_g_graph.dat','CARP_N17_g_graph.dat','CARP_K13_g_graph.dat','CARP_O12_g_graph.dat','CARP_S9_p_graph.dat','CARP_N16_g_graph.dat','CARP_S9_g_graph.dat','CARP_S11_g_graph.dat','CARP_K9_p_graph.dat','CARP_N9_g_graph.dat','CARP_N11_g_graph.dat','CARP_N15_g_graph.dat','CARP_F6_p_graph.dat']
 
 
 with open('Results/Summary_EPM.csv', 'w') as newFile:
