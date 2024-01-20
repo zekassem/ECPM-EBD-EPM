@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 df=pd.read_csv('Summary_Branch_Cut_SPC_ECPM.csv')
 df_1 = pd.read_csv('Summary_EPM.csv')
 df_2=pd.read_csv('SPC_Only_Summary.csv')
-
 df=pd.merge(df,df_1,on=['No. of Nodes','No. of Districts'], how='left',suffixes=('', '_df2'))
 df['Speedup'] = pd.to_numeric(df['Speedup'], errors='coerce')
 df = df.dropna()
@@ -20,6 +19,12 @@ result['RN No.']=range(1, len(result) + 1)
 result['RN Name'] = result['RN Name'].str.replace('CARP_','').str.replace('_graph.dat', '').str.split('_').apply(lambda x: '\\_'.join(x))
 results_final=result[['RN No.','RN Name','$|V|$','$|E|$','NBV','EPM_Time','Total_Time_SP','Improvement Ratio']]
 pd.options.display.float_format = '{:.2f}'.format
+results_g_1=results_final[results_final['Improvement Ratio']>1]
+mean_value = results_g_1['Improvement Ratio'].mean(skipna=True)
+median_value = results_g_1['Improvement Ratio'].median(skipna=True)
+print(mean_value)
+print(median_value)
+
 # Convert DataFrame to LaTeX code
 latex_code = results_final.to_latex(index=False, escape=False,na_rep='-',formatters={'$|E|$': '{:,.0f}'.format,'$|V|$': '{:,.0f}'.format,'NBV': '{:,.0f}'.format, 'Branch_Cut_Time': '{:,.0f}'.format,'Total_Time_SP': '{:,.0f}'.format,'EPM_Time': '{:,.0f}'.format,'Improvement Ratio': '{:,.2f}'.format})
 results_final.to_csv('Test.csv', index=False)
