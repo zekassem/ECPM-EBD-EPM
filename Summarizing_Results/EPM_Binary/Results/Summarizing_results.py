@@ -20,6 +20,7 @@ result['RN Name'] = result['RN Name'].str.replace('CARP_','').str.replace('_grap
 results_final=result[['RN No.','RN Name','$|V|$','$|E|$','NBV','EPM_Time','Total_Time_SP','Improvement Ratio']]
 pd.options.display.float_format = '{:.2f}'.format
 results_g_1=results_final[results_final['Improvement Ratio']>1]
+results_g_1.to_csv('Test.csv', index=False)
 mean_value = results_g_1['Improvement Ratio'].mean(skipna=True)
 median_value = results_g_1['Improvement Ratio'].median(skipna=True)
 print(mean_value)

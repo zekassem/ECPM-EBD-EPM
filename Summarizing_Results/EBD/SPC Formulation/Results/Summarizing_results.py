@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 df = pd.read_csv('Summary_Branch_Cut_SPC_EBD.csv')
-df = df.dropna()
+df = df.dropna() # This line will remove the no solution rows from the dataframe
 df['No. of Instances']=27
 df['No. of Feasible Instances'] = df.groupby('No. of Nodes')['No. of Nodes'].transform('count')
 # Getting df with Exceeded Time Limit
@@ -21,7 +21,7 @@ result.rename(columns={'No. of Nodes': '$|V|$', 'No. of Edges': '$|E|$','Instanc
 result = result.sort_values(by='NBV')
 result['RN No.']=range(1, len(result) + 1)
 result['RN Name'] = result['RN Name'].str.replace('CARP_','').str.replace('_graph.dat', '').str.split('_').apply(lambda x: '\\_'.join(x))
-results_final_1=result[['RN No.','RN Name','$|V|$','$|E|$','NBV','SPC-3 EBD']]
+results_final_1=result[['RN No.','SPC-3 EBD']]
 pd.options.display.float_format = '{:.2f}'.format
 # Convert DataFrame to LaTeX code
 latex_code = results_final_1.to_latex(index=False, escape=False,formatters={'$|E|$': '{:,.0f}'.format,'$|V|$': '{:,.0f}'.format,'NBV': '{:,.0f}'.format, 'Branch_Cut_Time': '{:,.0f}'.format,'SPC-3 EBD': '{:,.0f}'.format})

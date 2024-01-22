@@ -57,8 +57,9 @@ with open('Results/Summary_Branch_Cut_SPC_EBD.csv', 'w') as newFile:
                     i+=1
                 else:
                     list_probs.append([prob,num,tol])
-                    Total_Time_SPC = extra_time = gap = Sol_Status_SPC = Objective_Function_SPC = Time_SPC = np.loadtxt(
+                    Sol_Status_SPC = np.loadtxt(
                         results_file, skiprows=3, max_rows=1, usecols=0, dtype=str, delimiter=',')
+                    Total_Time_SPC= extra_time = gap =Objective_Function_SPC = Time_SPC=''
                     newFileWriter.writerow(
                         [i, prob, no_nodes1, no_edges1, num, tol, num_threads, Time_SPC, extra_time, Total_Time_SPC,
                          Objective_Function_SPC, Sol_Status_SPC, gap])
