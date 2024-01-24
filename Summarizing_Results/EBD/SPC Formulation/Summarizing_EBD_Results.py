@@ -56,7 +56,7 @@ with open('Results/Summary_Branch_Cut_SPC_EBD.csv', 'w') as newFile:
                          Objective_Function_SPC, Sol_Status_SPC, gap])
                     i+=1
                 else:
-                    list_probs.append([prob,num,tol])
+                    list_probs.append(['EBD_SP_Cut_Empty',prob,num,tol])
                     Sol_Status_SPC = np.loadtxt(
                         results_file, skiprows=3, max_rows=1, usecols=0, dtype=str, delimiter=',')
                     Total_Time_SPC= extra_time = gap =Objective_Function_SPC = Time_SPC=''
