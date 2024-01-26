@@ -30,7 +30,7 @@ df_tolerance['No. of Infeasible Instances'] = df_tolerance['No. of Infeasible In
 df_tolerance['No. of Instance that Exceeded Time Limit'] = df_tolerance['No. of Instance that Exceeded Time Limit'].fillna(0)
 df_tolerance['RN No.']=df_tolerance['RN Name'].apply(lambda x: 4 if x=='F6\_p' else 5)
 result_final=df_tolerance[['RN No.','tolerance','Total_Time_SP','No. of Infeasible Instances','No. of Instance that Exceeded Time Limit']]
-latex_code = result_final.to_latex(index=False, escape=False,formatters={'$|E|$': '{:,.0f}'.format,'$|V|$': '{:,.0f}'.format,'Total_Time_SP': '{:,.0f}'.format, 'No. of Infeasible Instances': '{:,.0f}'.format,'No. of Instance that Exceeded Time Limit': '{:,.0f}'.format})
+latex_code = result_final.to_latex(index=False, escape=False,formatters={'tolerance': '{:,.0%}'.format,'$|V|$': '{:,.0f}'.format,'Total_Time_SP': '{:,.0f}'.format, 'No. of Infeasible Instances': '{:,.0f}'.format,'No. of Instance that Exceeded Time Limit': '{:,.0f}'.format})
 
 with open('dataframe_table_2.tex', 'w') as file:
     file.write(latex_code)
@@ -57,8 +57,9 @@ plt.show()
 
 gap_analysis['RN No.']=gap_analysis['RN Name'].apply(lambda x: 4 if x=='F6\_p' else 5)
 gap_analysis=gap_analysis[['RN No.','tolerance','mean_gap','max_gap']]
-gap_analysis['tolerance']=gap_analysis['tolerance']*100
-latex_code_2 = gap_analysis.to_latex(index=False, escape=False,formatters={'$|E|$': '{:,.0f}'.format,'$|V|$': '{:,.0f}'.format,'Total_Time_SP': '{:,.0f}'.format, 'max_gap': '{:,.2f}'.format,'mean_gap': '{:,.2f}'.format})
+gap_analysis['mean_gap']=gap_analysis['mean_gap']/100
+gap_analysis['max_gap']=gap_analysis['max_gap']/100
+latex_code_2 = gap_analysis.to_latex(index=False, escape=False,formatters={'tolerance': '{:,.0%}'.format,'$|V|$': '{:,.0f}'.format,'Total_Time_SP': '{:,.0f}'.format, 'max_gap': '{:,.2%}'.format,'mean_gap': '{:,.2%}'.format})
 
 with open('dataframe_table_3.tex', 'w') as file:
     file.write(latex_code_2)
