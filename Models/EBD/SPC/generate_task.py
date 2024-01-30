@@ -1,17 +1,10 @@
 import pickle
 
 model=['EBD_SP_Cut_Empty']
-probs_list=['CARP_N17_g_graph.dat']
-no_dist_list=[40]
-tol_list=[0.01,0.1]
-task_list_1=[[m,k,i,j] for m in model for k in probs_list for i in no_dist_list for j in tol_list]
-
-probs_list=['CARP_N17_g_graph.dat']
-no_dist_list=[30]
-tol_list=[0.1]
-task_list_2=[[m,k,i,j] for m in model for k in probs_list for i in no_dist_list for j in tol_list]
-
-task_list=task_list_1+task_list_2
+probs_list=['CARP_F6_p_graph.dat','CARP_O12_g_graph.dat']
+no_dist_list=[2,4,6,8,10,20,30,40,50]
+tol_list=[0.01,0.1,1]
+task_list=[[m,k,i,j] for m in model for k in probs_list for i in no_dist_list for j in tol_list]
 
 
 task_dict={}

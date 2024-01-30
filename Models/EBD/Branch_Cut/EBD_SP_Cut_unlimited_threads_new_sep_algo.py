@@ -423,7 +423,7 @@ def execute_task(task):
             newFileWriter.writerow(['CPLEX Error'])
             newFileWriter.writerow([e])
 
-        print('Start of SPC Formulation')
+        # print('Start of SPC Formulation')
         # try:
         #     model_sp_cont = Model(graph, x_v, w_v, num, tol)
         #     obj, l_1, c = model_sp_cont.solve_poly_cont()
