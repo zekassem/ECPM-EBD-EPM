@@ -12,6 +12,11 @@ for i,j in enumerate(task_list):
     task_dict[i+1]=j[:]
 
 print(task_dict)
+
+for key,value in task_dict.items():
+    if value==['EBD_SP_Cut_Empty', 'CARP_O12_g_graph.dat', 2, 1]:
+        print(key)
+
 with open("pickle_file.pykl","wb") as f:
     pickle.dump(task_dict,f)
 
