@@ -44,9 +44,11 @@ with open('Results/Summary_EBD_Branch_Cut_Only.csv', 'w') as newFile:
 
                     CPLEX_Error = np.loadtxt(results_file, skiprows=3, max_rows=1, usecols=0, dtype=str,
                                                      delimiter=',')
-                    if CPLEX_Error == 'CPLEX Error':
-                        list_probs.append(results_file)
+                    error_type = np.loadtxt(results_file, skiprows=4, max_rows=1, usecols=0, dtype=str,
+                                            delimiter=',')
 
+                    if CPLEX_Error == 'CPLEX Error' and error_type=='CPLEX Error  1217: No solution exists.':
+                        list_probs.append(results_file)
                     pass
 
 print(list_probs)
