@@ -4,7 +4,7 @@ import csv
 # Input parameters to the districting problem
 probs_list=['CARP_F6_p_graph.dat','CARP_O12_g_graph.dat']
 no_dist_list=[2,4,6,8,10,20,30,40,50]
-tol_list=[0.01,0.1,1]
+tol_list=[0.01,0.1,0.5]
 
 
 with open('Results/Summary_Branch_Cut_SPC_EBD.csv', 'w') as newFile:
