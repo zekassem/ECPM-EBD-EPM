@@ -49,8 +49,9 @@ df_tolerance['No. of Instance that Could Not Find Feasible Solution Within Time 
 
 df_tolerance['RN No.']=df_tolerance['RN Name'].apply(lambda x: 4 if x=='F6\_p' else 5)
 result_final=df_tolerance[['RN No.','tolerance','Total_Time_SP','No. of Infeasible Instances','No. of Instance that Reached Time Limit','No. of Instance that Could Not Find Feasible Solution Within Time Limit']]
+result_final['Total_Time_SP']=result_final['Total_Time_SP']/(60*60)
 result_final.to_csv('results.csv')
-latex_code = result_final.to_latex(index=False, escape=False,formatters={'tolerance': '{:,.0%}'.format,'$|V|$': '{:,.0f}'.format,'Total_Time_SP': '{:,.0f}'.format, 'No. of Infeasible Instances': '{:,.0f}'.format,'No. of Instance that Reached Time Limit': '{:,.0f}'.format,'No. of Instance that Could Not Find Feasible Solution Within Time Limit': '{:,.0f}'.format})
+latex_code = result_final.to_latex(index=False, escape=False,formatters={'tolerance': '{:,.0%}'.format,'$|V|$': '{:,.0f}'.format,'Total_Time_SP': '{:,.2f}'.format, 'No. of Infeasible Instances': '{:,.0f}'.format,'No. of Instance that Reached Time Limit': '{:,.0f}'.format,'No. of Instance that Could Not Find Feasible Solution Within Time Limit': '{:,.0f}'.format})
 
 with open('dataframe_table_2.tex', 'w') as file:
     file.write(latex_code)

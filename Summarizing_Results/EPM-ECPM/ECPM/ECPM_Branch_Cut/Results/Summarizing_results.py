@@ -51,7 +51,7 @@ plt.plot(df[condition2]['No. of Districts'],df[condition2]['Speedup'],linestyle=
 plt.plot(df[condition3]['No. of Districts'],df[condition3]['Speedup'],linestyle=':', color='red',label=r'RN '+str(RN[2]))
 plt.plot(df[condition4]['No. of Districts'],df[condition4]['Speedup'],linestyle='-.', color='purple',label=r'RN '+str(RN[3]))
 plt.xlabel(r'$p$')
-plt.ylabel('CSC/SPC Improvement Ratio (CSC/SPC IR)')
+plt.ylabel('SPC/CSC Improvement Ratio (SPC/CSC)')
 ax.legend()
 plt.savefig('IR.png')
 # Show the plots
