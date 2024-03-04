@@ -115,8 +115,8 @@ def Dijkstras_Algo(Graph): # Lazy Implementation of Dijkstra's Algorithm
             path_nodes[node][target_node] = path_list
 
     # This block creates the shortest path between each two nodes based on edges defined [i,j]
-    for i in Graph.node_list:
-        for j in Graph.node_list:
+    for i in Graph.nodes_list:
+        for j in Graph.nodes_list:
             if i == j:
                 path_nodes[i][j] = []
 
@@ -127,9 +127,9 @@ def Dijkstras_Algo(Graph): # Lazy Implementation of Dijkstra's Algorithm
     print('total_extra_time')
     print(extra_time)
 
-    return nodetoedge_net_dist,nodetoedge_path,extra_time
+    return network_dist,path_nodes,extra_time
 
-probs_list=['CARP_S9_p_graph.dat','CARP_O12_g_graph.dat','CARP_F15_g_graph.dat']
+probs_list=['CARP_F15_g_graph.dat','CARP_N17_g_graph.dat','CARP_K13_g_graph.dat','CARP_F6_p_graph.dat']
 
 for prob in probs_list:
     graph=Graph(prob)
