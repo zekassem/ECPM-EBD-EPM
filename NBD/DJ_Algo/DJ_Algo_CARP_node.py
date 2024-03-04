@@ -114,7 +114,7 @@ def Dijkstras_Algo(Graph): # Lazy Implementation of Dijkstra's Algorithm
                 u = pred[node][u]
             path_nodes[node][target_node] = path_list
 
-    # This block creates the shortest path between each two nodes based on edges defined [i,j]
+    
     for i in Graph.nodes_list:
         for j in Graph.nodes_list:
             if i == j:
@@ -133,11 +133,11 @@ probs_list=['CARP_F15_g_graph.dat','CARP_N17_g_graph.dat','CARP_K13_g_graph.dat'
 
 for prob in probs_list:
     graph=Graph(prob)
-    nodetoedge_net_dist,nodetoedge_path,extra_time=Dijkstras_Algo(graph)
-    df=pd.DataFrame(nodetoedge_net_dist).transpose() # Gets the transpose of the dataframe
-    df.to_csv("nodetoedge_distance_"+str(prob)+".csv",header=True,index=True) # Spits out the shortest path distance from each node (row index) to each edge (column index)
-    df_2=pd.DataFrame(nodetoedge_path).transpose() # Gets the transpose of the dataframe
-    df_2.to_csv("nodetoedge_path_"+str(prob)+".csv") # Spits out the shortest path from each node (row index) to each edge (column index)
+    nodetonode_net_dist,nodetonode_path,extra_time=Dijkstras_Algo(graph)
+    df=pd.DataFrame(nodetonode_net_dist).transpose() # Gets the transpose of the dataframe
+    df.to_csv("nodetonode_distance_"+str(prob)+".csv",header=True,index=True) # Spits out the shortest path distance from each node (row index) to each node (column index)
+    df_2=pd.DataFrame(nodetonode_path).transpose() # Gets the transpose of the dataframe
+    df_2.to_csv("nodetonode_path_"+str(prob)+".csv") # Spits out the shortest path from each node (row index) to each node (column index)
     with open('Results/time_print_path_'+str(prob)+'.csv',
               'w') as newFile:
         newFileWriter = csv.writer(newFile, lineterminator='\n')
