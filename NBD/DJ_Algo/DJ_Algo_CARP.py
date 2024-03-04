@@ -56,14 +56,7 @@ class Graph():
             self.nodes_corr[i + 1].append(self.to_node_j[i] + 1)
             self.nodes_corr[i+1]=sorted(self.nodes_corr[i+1])
 
-        t0=time.time()
-        self.edge_number=collections.defaultdict(list)
-        for key,value in self.nodes_corr.items():
-            self.edge_number[(value[0],value[1])]=key
 
-        self.d_1=round(time.time()-t0,2)
-        print('time to create this dictionary')
-        print(self.d_1)
 
         # # Creating a list of the degree for every node
         self.degree = []
@@ -121,33 +114,16 @@ def Dijkstras_Algo(Graph): # Lazy Implementation of Dijkstra's Algorithm
                 u = pred[node][u]
             path_nodes[node][target_node] = path_list
 
+    # This block creates the shortest path between each two nodes based on edges defined [i,j]
+    for i in Graph.node_list:
+        for j in Graph.node_list:
+            if i == j:
+                path_nodes[i][j] = []
+
     l_2 = round(time.time() - t0, 2)
     print('Creating Path between nodes in terms of nodes')
     print(l_2)
-    t0 = time.time()
-    path_edges={i:{j:[graph.edge_number.get((sorted([path_nodes[i][j][k],path_nodes[i][j][k+1]])[0],sorted([path_nodes[i][j][k],path_nodes[i][j][k+1]])[1])) for k,l in enumerate(path_nodes[i][j]) if k + 1 < len(path_nodes[i][j])] for j in Graph.nodes_list} for i in Graph.nodes_list}
-    l_3 = round(time.time() - t0, 2)
-    print('Creating Path between nodes in terms of edges')
-    print(l_3)
-    # getting node to edge distance after getting the shortest path between every two nodes
-    nodetoedge_net_dist = collections.defaultdict(dict) # Create a nested dictionary to store the distance between each node and edge
-    nodetoedge_path=collections.defaultdict(dict) # Create a nested dictionary to store the path between each node and edge
-    t0 = time.time()
-    # creating the min node-to-edge distances nested dictionary, node-to-edge path nested dictionary:
-    for i, j in enumerate(Graph.node_i):
-        nodes_corr= Graph.nodes_corr[Graph.edge_e[i]]  # getting the corresponding nodes for each edge
-        network_dist_1=network_dist[Graph.node_i[i]][nodes_corr[0]] #network distance between the node_i and the first incident node in edge_e
-        network_dist_2=network_dist[Graph.node_i[i]][nodes_corr[1]]#network distance between the node_i and the second incident node in edge_e
-        nodetoedge_net_dist[Graph.node_i[i]][Graph.edge_e[i]]=min(network_dist_1,network_dist_2) #calculating the minimum of the two distances
-        if network_dist_1<network_dist_2:
-            nodetoedge_path[Graph.node_i[i]][Graph.edge_e[i]]=path_edges[Graph.node_i[i]][nodes_corr[0]]
-        else:
-            nodetoedge_path[Graph.node_i[i]][Graph.edge_e[i]]=path_edges[Graph.node_i[i]][nodes_corr[1]]
-
-    l_4 = round(time.time() - t0, 2)
-    print('Calculating the nodetoedge distance and nodetoedge path')
-    print(l_4)
-    extra_time=Graph.d_1+l_2+l_3+l_4
+    extra_time=l_2
     print('total_extra_time')
     print(extra_time)
 

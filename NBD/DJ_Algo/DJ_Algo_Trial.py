@@ -168,50 +168,16 @@ def Dijkstras_Algo(Graph): # Lazy Implementation of Dijkstra's Algorithm
     for i in Graph.node_list:
         for j in Graph.node_list:
             if i == j:
-                path_edges[i][j] = []
-            if i != j:
-                path_current = path_nodes[i][j]
-                path_edges[i][j] = [[path_current[k], path_current[k + 1]] for k, l in enumerate(path_current) if
-                                    k + 1 < len(path_current)]
+                path_nodes[i][j] = []
 
-    # This block creates the shortest path between each two nodes based on edge number
-    for i in Graph.node_list:
-        for j in Graph.node_list:
-            if i == j:
-                path_edges[i][j] = []
-            if i != j:
-                path_current = path_edges[i][j]
-                path_new = []
-                for k, l in enumerate(path_current):
-                    path_new.extend([key for key, value in Graph.nodes_corr.items() if
-                                     sorted(value) == sorted(path_current[k])])
-                path_edges[i][j] = path_new
-
-    # getting node to edge distance after getting the shortest path between every two nodes
-    nodetoedge_net_dist = collections.defaultdict(dict) # Create a nested dictionary to store the distance between each node and edge
-    nodetoedge_path=collections.defaultdict(dict) # Create a nested dictionary to store the path between each node and edge
-
-    # creating the min node-to-edge distances nested dictionary, node-to-edge path nested dictionary:
-    for i, j in enumerate(Graph.node_i):
-        nodes_corr= Graph.nodes_corr[Graph.edge_e[i]]  # getting the corresponding nodes for each edge
-        network_dist_1=network_dist[Graph.node_i[i]][nodes_corr[0]] #network distance between the node_i and the first incident node in edge_e
-        network_dist_2=network_dist[Graph.node_i[i]][nodes_corr[1]]#network distance between the node_i and the second incident node in edge_e
-        nodetoedge_net_dist[Graph.node_i[i]][Graph.edge_e[i]]=min(network_dist_1,network_dist_2) #calculating the minimum of the two distances
-        if network_dist_1<network_dist_2:
-            nodetoedge_path[Graph.node_i[i]][Graph.edge_e[i]]=path_edges[Graph.node_i[i]][nodes_corr[0]]
-        else:
-            nodetoedge_path[Graph.node_i[i]][Graph.edge_e[i]]=path_edges[Graph.node_i[i]][nodes_corr[1]]
-
-
-
-    return nodetoedge_net_dist,nodetoedge_path
+    return network_dist,path_nodes
 prob=51
 graph=Graph(prob)
-nodetoedge_net_dist,nodetoedge_path=Dijkstras_Algo(graph)
-df=pd.DataFrame(nodetoedge_net_dist).transpose() # Gets the transpose of the dataframe
-df.to_csv("nodetoedge_distance_"+str(prob)+".csv",header=True,index=True) # Spits out the shortest path distance from each node (row index) to each edge (column index)
-df_2=pd.DataFrame(nodetoedge_path).transpose() # Gets the transpose of the dataframe
-df_2.to_csv("nodetoedge_path_"+str(prob)+".csv") # Spits out the shortest path from each node (row index) to each edge (column index)
+nodetonode_net_dist,nodetonode_path=Dijkstras_Algo(graph)
+df=pd.DataFrame(nodetonode_net_dist).transpose() # Gets the transpose of the dataframe
+df.to_csv("nodetonode_distance_"+str(prob)+".csv",header=True,index=True) # Spits out the shortest path distance from each node (row index) to each node (column index)
+df_2=pd.DataFrame(nodetonode_path).transpose() # Gets the transpose of the dataframe
+df_2.to_csv("nodetoedge_path_"+str(prob)+".csv") # Spits out the shortest path from each node (row index) to each node (column index)
 print(df_2.shape)
 
 
