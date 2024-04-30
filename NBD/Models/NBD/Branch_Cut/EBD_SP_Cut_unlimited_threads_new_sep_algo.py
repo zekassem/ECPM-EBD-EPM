@@ -40,11 +40,11 @@ class Graph():
 
         # # creating a vector of index for every pair of node (i) and edge (e)
         self.node_i = []
-        self.edge_e = []
+        self.node_j = []
         for i in self.nodes_list:
-            for j in self.edges_list:
+            for j in self.nodes_list:
                 self.node_i.append(i)
-                self.edge_e.append(j)
+                self.node_j.append(j)
 
         self.adj = collections.defaultdict(list)
         for i in range(len(self.from_node_i)):
@@ -58,44 +58,19 @@ class Graph():
             self.nodes_corr[i + 1].append(self.to_node_j[i] + 1)
             self.nodes_corr[i + 1] = sorted(self.nodes_corr[i + 1])
 
-        t0 = time.time()
-        self.edge_number = collections.defaultdict(list)
-        for key, value in self.nodes_corr.items():
-            self.edge_number[(value[0], value[1])] = key
 
-        self.d_1 = round(time.time() - t0, 2)
-        print('time to create this dictionary')
-        print(self.d_1)
 
         # # Creating a list of the degree for every node
         self.degree = []
         for i in self.nodes_list:
             self.degree.append(len(self.edges[i]))
 
-        # # Creating a dictionary for neighboring edges for each edge (Looks like it can be further simplified)
-        self.edges_neighboring = collections.defaultdict(list)
-        for e in self.edges_list:
-            nodes_corr = []
-            nodes_corr.append(self.from_node_i[e - 1] + 1)
-            nodes_corr.append(self.to_node_j[e - 1] + 1)
-            self.edges_nei = []
-            for i in nodes_corr:
-                self.edges_nei.extend(self.edges[i])
-            self.edges_nei1 = list(set(self.edges_nei))
-            l = []
-            l.append(e)
-            self.edges_nei = [x for x in self.edges_nei1 if x not in l]
-            self.edges_neighboring[e].extend(self.edges_nei)
 
-        self.demand_edge_index = {}  # creating a dictionary that has the length of each edge using the edge index
-        for index, i in enumerate(self.from_node_i):
-            self.demand_edge_index[index + 1] = self.demand[index]
-
-        self.nodetoedge_net_dist = pd.read_csv("nodetoedge_distance_" + str(prob) + ".csv", header=0, index_col=0)
-        self.nodetoedge_path = pd.read_csv("nodetoedge_path_" + str(prob) + ".csv", index_col=0, header=0)
-        self.nodetoedge_path.columns = self.edges_list
-        self.nodetoedge_path = self.nodetoedge_path.transpose()
-        self.nodetoedge_path_dict = self.nodetoedge_path.to_dict()
+        self.nodetonode_net_dist = pd.read_csv("nodetonode_distance_" + str(prob) + ".csv", header=0, index_col=0)
+        self.nodetonode_path = pd.read_csv("nodetonode_path_" + str(prob) + ".csv", index_col=0, header=0)
+        self.nodetonode_path.columns = self.nodes_list
+        self.nodetonode_path = self.nodetonode_path.transpose()
+        self.nodetonode_path_dict = self.nodetonode_path.to_dict()
 
 
 ## End of Data
@@ -108,7 +83,7 @@ def BFS(Graph,index, result, l):
     d = []  # distance vector
     Q = []  # set of gray vectors
     s = l  # the source edge index in the edge vector
-    for e in Graph.edges_list:
+    for node in Graph.nodes_list:
         color.append(int(0))  # having all the colors of edges to be white
         d.append(int(0))
         pred.append(int(0))
@@ -119,10 +94,10 @@ def BFS(Graph,index, result, l):
 
     while len(Q) != 0:  # while the cardinality of set of gray edges is not equal to zero
         u = Q.pop(0)  # Dequeue the first edge
-        edges_nei=Graph.edges_neighboring[u] # Neighboring edges
+        nodes_nei=Graph.adj[u] # Neighboring nodes
 
-        edges_neigh_n = list(set(edges_nei).intersection(set(result[index]))) # We're only considering the edges that are selected in the territory that's why we're doing the intersection
-        for i in edges_neigh_n:  # This is the main loop
+        nodes_neigh_n = list(set(nodes_nei).intersection(set(result[index]))) # We're only considering the edges that are selected in the territory that's why we're doing the intersection
+        for i in nodes_neigh_n:  # This is the main loop
             if color[i - 1] == 0:
                 color[i - 1] = 1
                 d[i - 1] = current_dis + 1
@@ -136,18 +111,17 @@ def BFS(Graph,index, result, l):
 
 
 
-
-def constraints_wo_cuts(problem, Graph, no_dist,tol, x_v, w_v): #  This function adds all of the constraints for the original districting problem
+def constraints_wo_cuts(problem, Graph, no_dist,tol, x_v): #  This function adds all of the constraints for the original districting problem
     # input edges_list, no_nodes,no_edges,no_dist,t
-    # sum i e V (xie)=1 for e e E: each edge is assigned to one territory
-    expr = [cplex.SparsePair(x_v[(e - 1):Graph.no_edges * Graph.no_nodes:Graph.no_edges],
-                             [1 for i in range(Graph.no_nodes)]) for e in Graph.edges_list]
+    # sum i e V (xij)=1 for j \in V: each node is assigned to one territory
+    expr = [cplex.SparsePair(x_v[(j - 1):Graph.no_nodes * Graph.no_nodes:Graph.no_nodes],
+                             [1 for i in range(Graph.no_nodes)]) for j in Graph.nodes_list]
     sens = ["E"] * len(expr)
     rhs = [1] * len(expr)
     problem.linear_constraints.add(lin_expr=expr, senses=sens, rhs=rhs)
 
-    # sum i e V w_i=p
-    sum_x = w_v
+    # sum i e V x_ii=p
+    sum_x = [j for i,j in enumerate(x_v) if Graph.node_i[i]==Graph.node_j[i]]
     coeff = [1 for i in range(Graph.no_nodes)]
     problem.linear_constraints.add(lin_expr=[cplex.SparsePair(sum_x, coeff)], senses=["E"],
                                    rhs=[no_dist])
@@ -155,10 +129,10 @@ def constraints_wo_cuts(problem, Graph, no_dist,tol, x_v, w_v): #  This function
     sum_x = []
     coeff = []
     # Balancing Constraints
-    # sum e e E le xie <= sum(le)/p * (1+tau) wi for i e V
-    rhs_1 = (sum(Graph.demand_edge_index.values()) / no_dist) * (1 + tol)
+    # sum j e V le xij <= |V|/p * (1+tau) xii for i e V
+    rhs_1 = (Graph.no_nodes/ no_dist) * (1 + tol)
 
-    expr = [cplex.SparsePair([w_v[i - 1]] + x_v[(i - 1) * Graph.no_edges:i * Graph.no_edges],
+    expr = [cplex.SparsePair([x_v[i - 1] if Graph.node_i[i]] + x_v[(i - 1) * Graph.no_nodes:i * Graph.no_nodes],
                              [-rhs_1] + list(Graph.demand_edge_index.values())) for i in Graph.nodes_list]
     sens = ["L"] * len(expr)
     rhs = [0] * len(expr)
@@ -189,16 +163,14 @@ def SP_contiguity_const(Graph,x_v,problem): # Function that adds the contiguity 
 class Contiguity_Lazy_Callback():
     def __init__(self,x_v,w_v,Graph):
         self.x_v=x_v
-        self.w_v=w_v
         self.Graph=Graph
     def lazy_contiguity(self,context):
         x_v=self.x_v
-        w_v=self.w_v
         Graph=self.Graph
         result = []
         # print('candidate_solution')
         # print(context.get_candidate_point(w_v))
-        center_node1 = [i for i, val in enumerate(context.get_candidate_point(w_v)) if val > 0.01]
+        center_node1 = [i for i, val in enumerate(context.get_candidate_point(x_v)) if Graph.node_i[i] == Graph.node_j[i] and val > 0.01]
         center_node = [i + 1 for i in center_node1]
         for o in center_node:
             result.append([Graph.edge_e[i] for i, val in enumerate(context.get_candidate_point(x_v)) if
@@ -303,9 +275,8 @@ class Contiguity_Lazy_Callback():
 
 
 class Model(): # This is the model where we add the variables and the constraints
-    def __init__(self,Graph, x_v, w_v,num,tol):
+    def __init__(self,Graph, x_v, num,tol):
         self.x_v=x_v
-        self.w_v=w_v
         self.Graph=Graph
         c_org = cplex.Cplex()
         self.no_threads = 'unlimited'
@@ -317,22 +288,20 @@ class Model(): # This is the model where we add the variables and the constraint
         c_org.objective.set_sense(c_org.objective.sense.minimize)
         # Declare decision variables (first argument is decision variables names, second argument is type of decision variables,
         # third argument is objective function coefficients)
-        nodetoedge_net_dist_list = Graph.nodetoedge_net_dist.stack().tolist()  # converting the dataframe into a list
-        c_org.variables.add(names=x_v, types=["B"] * len(x_v), obj=nodetoedge_net_dist_list)
-        c_org.variables.add(names=w_v, types=["B"] * len(w_v))
-        c_main=constraints_wo_cuts(c_org, Graph, num,tol, x_v, w_v)
+        nodetonode_net_dist_list = Graph.nodetonode_net_dist.stack().tolist()  # converting the dataframe into a list
+        c_org.variables.add(names=x_v, types=["B"] * len(x_v), obj=nodetonode_net_dist_list)
+        c_main=constraints_wo_cuts(c_org, Graph, num,tol, x_v)
         self.c_main=c_main
 
     def branch_bound_cut(self): # This is the method that has the branch and bound and cut
         x_v = self.x_v
-        w_v = self.w_v
         Graph = self.Graph
         c_1=self.c_main
         t0 = time.time()
         d=c_1
         d.parameters.clocktype.set(2)
         d.parameters.timelimit.set(43200)
-        contiguity_callback = Contiguity_Lazy_Callback(x_v, w_v, Graph)
+        contiguity_callback = Contiguity_Lazy_Callback(x_v, Graph)
         contextmask = cplex.callbacks.Context.id.candidate
         d.set_callback(contiguity_callback, contextmask)
         d.solve()
@@ -340,11 +309,9 @@ class Model(): # This is the model where we add the variables and the constraint
         print('Time to Solve Using Branch and Cut')
         print(l_1)
         sol_1 = [x_v[i] for i, j in enumerate(d.solution.get_values(x_v)) if j > 0.01]
-        sol_2 = [w_v[i] for i, j in enumerate(d.solution.get_values(w_v)) if j > 0.01]
         obj = d.solution.get_objective_value()
         print("gap tolerance = ", d.parameters.mip.tolerances.mipgap.get())
         print(sol_1)
-        print(sol_2)
         print(obj)
 
         return obj,l_1,d
@@ -352,7 +319,6 @@ class Model(): # This is the model where we add the variables and the constraint
     def solve_poly_cont(self):
         Graph = self.Graph
         x_v = self.x_v
-        w_v = self.w_v
         c_2=self.c_main
         t0 = time.time()
         c=SP_contiguity_const(Graph, x_v, c_2)
@@ -362,11 +328,9 @@ class Model(): # This is the model where we add the variables and the constraint
         c.solve()
         l_1 = round(time.time() - t0, 2)
         sol_1 = [x_v[i] for i, j in enumerate(c.solution.get_values(x_v)) if j > 0.01]
-        sol_2 = [w_v[i] for i, j in enumerate(c.solution.get_values(w_v)) if j > 0.01]
         obj = c.solution.get_objective_value()
         print('Solution')
         print(sol_1)
-        print(sol_2)
         print('Objective Function')
         print(obj)
         return obj,l_1,c
@@ -385,21 +349,16 @@ def execute_task(task):
     no_nodes = graph.no_nodes
     no_edges = graph.no_edges
     node_i = graph.node_i
-    edge_e = graph.edge_e
+    node_j = graph.node_j
     # Creating a list of variable names (x_i,(j,k)): binary variable whether the edge (j,k) is assigned to district i
     x_v = []
     for i in range(len(node_i)):
-        x = 'x' + str(node_i[i]) + '_' + str(edge_e[i])
+        x = 'x' + str(node_i[i]) + '_' + str(node_j[i])
         x_v.append(x)
 
-    # Creating a list of variable names (wi): binary variable whether the node i is the center or not
-    w_v = []
-    for i in range(len(nodes_list)):
-        w = 'w' + str(nodes_list[i])
-        w_v.append(w)
 
     distr_v = list(range(1, num + 1))  # Districts vector
-    model_bbb = Model(graph, x_v, w_v, num, tol)
+    model_bbb = Model(graph, x_v, num, tol)
     no_threads = model_bbb.no_threads
     with open('Results/Cut_Empty/'+str(no_threads)+'_threads/EBD_Cut_Set_vs_SP_Contiguity_no_dist_' + str(num) +'_tol_'+str(tol)+ '_prob_' + str(prob) + '.csv',
               'w') as newFile:

@@ -68,18 +68,16 @@ class Graph():
             self.euc_dist_edge_index[index + 1] = self.euc_dist[self.from_node_i[index] + 1][self.to_node_j[index] + 1]
         # creating a vector of index for every pair of node (i) and edge (e)
         self.node_i = []
-        self.node_j = []
+        self.edge_e = []
         for i in self.nodes_list:
             for j in self.edges_list:
                 self.node_i.append(i)
-                self.node_j.append(j)
+                self.edge_e.append(j)
 
         self.adj = collections.defaultdict(list)
         for i in range(len(self.from_node_i)):
             self.adj[self.from_node_i[i] + 1].append(self.to_node_j[i] + 1)
             self.adj[self.to_node_j[i] + 1].append(self.from_node_i[i] + 1)
-
-        print(self.adj)
 
         # Corresponding nodes for every edge
         self.nodes_corr = collections.defaultdict(list)
@@ -118,7 +116,7 @@ def BFS(Graph,index, result, l):
     d = []  # distance vector
     Q = []  # set of gray vectors
     s = l  # the source edge index in the edge vector
-    for node in Graph.nodes_list:
+    for e in Graph.edges_list:
         color.append(int(0))  # having all the colors of edges to be white
         d.append(int(0))
         pred.append(int(0))
@@ -129,11 +127,10 @@ def BFS(Graph,index, result, l):
 
     while len(Q) != 0:  # while the cardinality of set of gray edges is not equal to zero
         u = Q.pop(0)  # Dequeue the first edge
-        nodes_nei = Graph.adj[u]  # Neighboring nodes
+        edges_nei=Graph.edges_neighboring[u] # Neighboring edges
 
-        nodes_neigh_n = list(set(nodes_nei).intersection(set(result[
-                                                                 index])))  # We're only considering the edges that are selected in the territory that's why we're doing the intersection
-        for i in nodes_neigh_n:  # This is the main loop
+        edges_neigh_n = list(set(edges_nei).intersection(set(result[index]))) # We're only considering the edges that are selected in the territory that's why we're doing the intersection
+        for i in edges_neigh_n:  # This is the main loop
             if color[i - 1] == 0:
                 color[i - 1] = 1
                 d[i - 1] = current_dis + 1
@@ -148,16 +145,15 @@ def BFS(Graph,index, result, l):
 
 def constraints_wo_cuts(problem, Graph, no_dist,tol, x_v, w_v): #  This function adds all of the constraints for the original districting problem
     # input edges_list, no_nodes,no_edges,no_dist,t
-    # sum i e V (xij)=1 for j e V: each node is assigned to one territory
-    expr = [cplex.SparsePair(x_v[(j - 1):Graph.no_nodes * Graph.no_nodes:Graph.no_nodes],
-                             [1 for i in range(Graph.no_nodes)]) for j in Graph.nodes_list]
+    # sum i e V (xie)=1 for e e E: each edge is assigned to one territory
+    expr = [cplex.SparsePair(x_v[(e - 1):Graph.no_edges * Graph.no_nodes:Graph.no_edges],
+                             [1 for i in range(Graph.no_nodes)]) for e in Graph.edges_list]
     sens = ["E"] * len(expr)
     rhs = [1] * len(expr)
     problem.linear_constraints.add(lin_expr=expr, senses=sens, rhs=rhs)
 
-    # sum i e V x_ii=p
-    sum_x = [j for i,j in enumerate(x_v) if Graph.node_i[i]==Graph.node_j[i]]
-    print(sum_x)
+    # sum i e V w_i=p
+    sum_x = w_v
     coeff = [1 for i in range(Graph.no_nodes)]
     problem.linear_constraints.add(lin_expr=[cplex.SparsePair(sum_x, coeff)], senses=["E"],
                                    rhs=[no_dist])
@@ -401,11 +397,11 @@ def execute_task(task):
     no_nodes = graph.no_nodes
     no_edges = graph.no_edges
     node_i = graph.node_i
-    node_j  = graph.node_j
+    edge_e = graph.edge_e
     # Creating a list of variable names (x_i,(j,k)): binary variable whether the edge (j,k) is assigned to district i
     x_v = []
     for i in range(len(node_i)):
-        x = 'x' + str(node_i[i]) + '_' + str(node_j[i])
+        x = 'x' + str(node_i[i]) + '_' + str(edge_e[i])
         x_v.append(x)
 
     # Creating a list of variable names (wi): binary variable whether the node i is the center or not

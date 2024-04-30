@@ -59,6 +59,7 @@ with open('dataframe_table_2.tex', 'w') as file:
 Average_by_District['RN No.']=Average_by_District['RN Name'].apply(lambda x: 4 if x=='F6\_p' else 5)
 result_final_1=Average_by_District[['RN No.','No. of Districts','Total_Time_SP']]
 
+result_final_1.to_csv('Average_By_District.csv')
 
 RN=[4,5]
 condition1 = result_final_1['RN No.'] == 4

@@ -114,7 +114,7 @@ def Dijkstras_Algo(Graph): # Lazy Implementation of Dijkstra's Algorithm
                 u = pred[node][u]
             path_nodes[node][target_node] = path_list
 
-    
+
     for i in Graph.nodes_list:
         for j in Graph.nodes_list:
             if i == j:
