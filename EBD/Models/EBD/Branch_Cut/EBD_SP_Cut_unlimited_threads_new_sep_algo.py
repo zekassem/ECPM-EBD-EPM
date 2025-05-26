@@ -7,6 +7,7 @@ import cplex
 from itertools import combinations
 import sys
 import traceback
+import os
 
 class Graph():
     def __init__(self, prob):
@@ -311,8 +312,11 @@ class Model(): # This is the model where we add the variables and the constraint
         self.no_threads = 'unlimited'
         # c_org.parameters.threads.set(self.no_threads)
         c_org.parameters.mip.strategy.file.set(3)
-        c_org.parameters.workdir.set('/scratch/zekassem/nodefile')
-
+        # Set a local directory for nodefiles
+        local_nodefile_path = r'C:\Users\zizo_\Desktop\Python\Python\EBD\Models\EBD\Branch_Cut\nodefiles'
+        # Ensure the directory exists
+        os.makedirs(local_nodefile_path, exist_ok=True)
+        c_org.parameters.workdir.set(local_nodefile_path)
         # Setting the objective function to be Minmization
         c_org.objective.set_sense(c_org.objective.sense.minimize)
         # Declare decision variables (first argument is decision variables names, second argument is type of decision variables,
@@ -444,3 +448,21 @@ def execute_task(task):
 # For testing purposes
 # task=['EBD_SP_Cut_Empty','CARP_N17_g_graph.dat',2,1]
 # execute_task(task)
+
+if __name__ == "__main__":
+    # List of tasks: [Model Name, Problem File Name, Number of Districts, Balance Tolerance]
+    task_list = [
+        ["EBD_SP_Cut_Empty", "CARP_F15_g_graph.dat", 6, 0.01],
+        # ["EBD_SP_Cut_Empty", "CARP_F6_p_graph.dat", 4, 0.01],
+        # ["EBD_SP_Cut_Empty", "CARP_F6_p_graph.dat", 6, 0.01],
+        # ["EBD_SP_Cut_Empty", "CARP_S9_p_graph.dat", 2, 0.01],
+        # ["EBD_SP_Cut_Empty", "CARP_S9_p_graph.dat", 4, 0.01],
+        # ["EBD_SP_Cut_Empty", "CARP_S9_p_graph.dat", 6, 0.01],
+        # Add more tasks here as needed
+    ]
+
+    for task in task_list:
+        try:
+            execute_task(task)
+        except Exception as e:
+            print(f"Error while executing task {task}: {e}")
