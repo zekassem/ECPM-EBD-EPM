@@ -5,8 +5,6 @@ import csv
 import pandas as pd
 import cplex
 from itertools import combinations
-import sys
-import traceback
 
 class Graph():
     def __init__(self, prob):
@@ -29,9 +27,11 @@ class Graph():
             self.edges[self.to_node_j[i] + 1].append(i + 1)
 
         self.edge_lengths = np.loadtxt(self.file, skiprows=9, max_rows=self.no_edges1, usecols=4, dtype=float)
+        self.demand = np.loadtxt(self.file, skiprows=9, max_rows=self.no_edges1, usecols=5, dtype=float)
         # This block calculates the length of each edge
         index = 0
-        self.euc_dist = collections.defaultdict(dict)  # dictionary to store the Euclidean Distance of each edge, since it is a symmetric matrix we add the below two lines
+        self.euc_dist = collections.defaultdict(
+            dict)  # dictionary to store the Euclidean Distance of each edge, since it is a symmetric matrix we add the below two lines
         for ind, j in enumerate(self.from_node_i):
             self.euc_dist[self.from_node_i[ind] + 1][self.to_node_j[index] + 1] = self.edge_lengths[index]
             self.euc_dist[self.to_node_j[ind] + 1][self.from_node_i[index] + 1] = self.edge_lengths[index]
@@ -90,6 +90,10 @@ class Graph():
         for index, i in enumerate(self.from_node_i):
             self.euc_dist_edge_index[index + 1] = self.edge_lengths[index]
 
+        self.demand_edge_index = {}  # creating a dictionary that has the length of each edge using the edge index
+        for index, i in enumerate(self.from_node_i):
+            self.demand_edge_index[index + 1] = self.demand[index]
+
         self.nodetoedge_net_dist = pd.read_csv("nodetoedge_distance_" + str(prob) + ".csv", header=0, index_col=0)
         self.nodetoedge_path = pd.read_csv("nodetoedge_path_" + str(prob) + ".csv", index_col=0, header=0)
         self.nodetoedge_path.columns = self.edges_list
@@ -134,9 +138,7 @@ def BFS(Graph,index, result, l):
     return b
 
 
-
-
-def constraints_wo_cuts(problem, Graph, no_dist, x_v, w_v): #  This function adds all of the constraints for the original districting problem
+def constraints_wo_cuts(problem, Graph, no_dist,tol, x_v, w_v): #  This function adds all of the constraints for the original districting problem
     # input edges_list, no_nodes,no_edges,no_dist,t
     # sum i e V (xie)=1 for e e E: each edge is assigned to one territory
     expr = [cplex.SparsePair(x_v[(e - 1):Graph.no_edges * Graph.no_nodes:Graph.no_edges],
@@ -151,15 +153,25 @@ def constraints_wo_cuts(problem, Graph, no_dist, x_v, w_v): #  This function add
     problem.linear_constraints.add(lin_expr=[cplex.SparsePair(sum_x, coeff)], senses=["E"],
                                    rhs=[no_dist])
 
-
     sum_x = []
     coeff = []
-    # x_i,(j,k)<=w_i
-    expr = [cplex.SparsePair([x_v[index], w_v[i - 1]], [1, -1]) for index, i in enumerate(Graph.node_i)]
+    # Balancing Constraints
+    # Balancing Constraints
+    # sum e e E le xie <= sum(le)/p * (1+tau) wi for i e V
+    rhs_1 = (sum(Graph.demand_edge_index.values()) / no_dist) * (1 + tol)
+
+    expr = [cplex.SparsePair([w_v[i - 1]] + x_v[(i - 1) * Graph.no_edges:i * Graph.no_edges],
+                             [-rhs_1] + list(Graph.demand_edge_index.values())) for i in Graph.nodes_list]
     sens = ["L"] * len(expr)
     rhs = [0] * len(expr)
     problem.linear_constraints.add(lin_expr=expr, senses=sens, rhs=rhs)
-
+    # sum e e E le xie >= sum(le)/p * (1-tau) wi for i e V
+    rhs_2 = (sum(Graph.demand_edge_index.values()) / no_dist) * (1 - tol)
+    expr = [cplex.SparsePair([w_v[i - 1]] + x_v[(i - 1) * Graph.no_edges:i * Graph.no_edges],
+                             [-rhs_2] + list(Graph.demand_edge_index.values())) for i in Graph.nodes_list]
+    rhs = [0] * len(expr)
+    sens = ["G"] * len(expr)
+    problem.linear_constraints.add(lin_expr=expr, senses=sens, rhs=rhs)
 
     return problem
 
@@ -174,41 +186,67 @@ def SP_contiguity_const(Graph,x_v,problem): # Function that adds the contiguity 
     problem.linear_constraints.add(lin_expr=expr, senses=sens, rhs=rhs)
     return problem
 
-
-
-class Contiguity_Lazy_Callback():
-    def __init__(self,x_v,w_v,Graph):
+class Model(): # This is the model where we add the variables and the constraints
+    def __init__(self,Graph, x_v, w_v,num,tol):
         self.x_v=x_v
         self.w_v=w_v
         self.Graph=Graph
-    def lazy_contiguity(self,context):
-        x_v=self.x_v
-        w_v=self.w_v
-        Graph=self.Graph
-        result = []
-        # print('candidate_solution')
-        # print(context.get_candidate_point(w_v))
-        center_node1 = [i for i, val in enumerate(context.get_candidate_point(w_v)) if val > 0.01]
+        c_org = cplex.Cplex()
+        self.no_threads = 'unlimited'
+        # c_org.parameters.threads.set(self.no_threads)
+        c_org.parameters.mip.strategy.file.set(0)
+        # Setting the objective function to be Minmization
+        c_org.objective.set_sense(c_org.objective.sense.minimize)
+        # Declare decision variables (first argument is decision variables names, second argument is type of decision variables,
+        # third argument is objective function coefficients)
+        nodetoedge_net_dist_list = Graph.nodetoedge_net_dist.stack().tolist()  # converting the dataframe into a list
+        c_org.variables.add(names=x_v, types=["B"] * len(x_v), obj=nodetoedge_net_dist_list)
+        c_org.variables.add(names=w_v, types=["B"] * len(w_v))
+        c_main=constraints_wo_cuts(c_org, Graph, num,tol, x_v, w_v)
+        self.c_main=c_main
+
+    def branch_bound_cut(self): # This is the method that has the branch and bound and cut
+        x_v = self.x_v
+        w_v = self.w_v
+        Graph = self.Graph
+        c_1=self.c_main
+        t0 = time.time()
+        d=c_1
+        d.parameters.clocktype.set(2)
+        d.parameters.timelimit.set(43200)
+        d.solve()
+        l_1 = round(time.time() - t0, 2)
+        print('time to solve before BBB')
+        print(l_1)
+        t1 = time.time()
+        result=[]
+        center_node1 = [i for i, val in enumerate(d.solution.get_values(w_v)) if val > 0.01]
         center_node = [i + 1 for i in center_node1]
         for o in center_node:
-            result.append([Graph.edge_e[i] for i, val in enumerate(context.get_candidate_point(x_v)) if
-                           val > 0.01 and Graph.node_i[i] == o])
-        index = 0
-        connected_comp = []
-        cut_set_for_connected_comp = []
-        for o in center_node:  # This loop is to detect whether there are disconnected districts or not
-            explored_edges_s1 = []  # edges that are found using BFS
-            R = []  # Set of Edges that need to be explored using BFS
-            R.extend(result[index])
-            if len(R)>0:
+            result.append([Graph.edge_e[i] for i,val in enumerate(d.solution.get_values(x_v)) if val>0.01 and Graph.node_i[i]==o])
+        a = 1
+        num_iterations=0 # counter for the number of iterations
+        num_cuts=0 # counter for the number of
+        while a > 0:
+            num_iterations+=1
+            C = []
+            index = 0
+            for o in center_node:  # This loop is to detect whether there are disconnected districts or not
+                explored_edges_s1 = []  # edges that are found using BFS
+                R = []  # Set of Edges that need to be explored using BFS
+                R.extend(result[index])
                 l = R[0]  # the source edge from which we will start exploring
                 b = BFS(Graph, index, result, l)
                 explored_edges_s1.extend([i + 1 for i, val in enumerate(b) if val == 2])
                 explored_edges_s = list(set(explored_edges_s1))
                 unexplored_edges = list(
                     set(R).difference(set(explored_edges_s)))  # list of unexplored edges within a district
-                connected_comp = []
-                cut_set_for_connected_comp = []
+                connected_comp=[]
+                cut_set_for_connected_comp=[]
+                if len(unexplored_edges) > 0:
+                    C.append(0)
+                else:
+                    C.append(1)
                 explored_edges_s1 = []  # list of explored edges for every district to keep track of all connected components
                 while len(unexplored_edges) > 0:  # This while loop to find all of the different connected components
                     explored_edges_s1.extend([i + 1 for i, val in enumerate(b) if val == 2])
@@ -223,112 +261,84 @@ class Contiguity_Lazy_Callback():
                     connect_edges_neigh_nested = [Graph.edges_neighboring[i] for i in connect_edges]
                     connect_edges_neighboring1 = [j for sublist in connect_edges_neigh_nested for j in sublist]
                     connect_edges_neighboring = set(connect_edges_neighboring1)  # Removing duplicated edges
-                    connect_edges_neighboring_n = list(connect_edges_neighboring.difference(
-                        set(connect_edges)))  # Neighboring edges to connected component excluding edges in the connected component
+                    connect_edges_neighboring_n = list(connect_edges_neighboring.difference(set(connect_edges)))  # Neighboring edges to connected component excluding edges in the connected component
                     cut_set_for_connected_comp.append(connect_edges_neighboring_n)
                     if len(unexplored_edges) > 0:  # finding the next connected component
                         l = unexplored_edges[0]
                         b = BFS(Graph, index, result, l)
                 index = index + 1
-            connected_comp_combin = list(combinations(connected_comp, 2))
-            cut_set_for_connected_comb = list(combinations(cut_set_for_connected_comp, 2))
+                connected_comp_combin=list(combinations(connected_comp, 2))
+                cut_set_for_connected_comb = list(combinations(cut_set_for_connected_comp, 2))
+                # print('connected_components')
+                # print(connected_comp)
+                # print('cut_sets')
+                # print(cut_set_for_connected_comp)
+                for combo_index,combo_val in enumerate(connected_comp_combin):
+                    cut_set_1=cut_set_for_connected_comb[combo_index][0]
+                    cut_set_2=cut_set_for_connected_comb[combo_index][1]
+                    for ind,val in enumerate(combo_val[1]):
+                        s = (- len(combo_val[0]))  # -|S|
+                        sum_x = []
+                        coeff=[]
+                        indicies_1 = [(o - 1) * Graph.no_edges + (q - 1) for q in combo_val[0]]
+                        x_variables = [x_v[i] for i in indicies_1]
+                        sum_x.extend(x_variables)
+                        coeff1 = [-1 for r in range(len(indicies_1))]
+                        coeff.extend(coeff1)
+                        indicies_2 = [(o - 1) * Graph.no_edges + (q - 1) for q in cut_set_1]
+                        x_variables_1 = [x_v[i] for i in indicies_2]
+                        coeff2 = [1 for r in range(len(indicies_2))]
+                        coeff.extend(coeff2)
+                        sum_x.extend(x_variables_1)
+                        edge_j_k=[val]
+                        indicies_3=[(o - 1) * Graph.no_edges + (q - 1) for q in edge_j_k]
+                        x_variables_3=[x_v[i] for i in indicies_3]
+                        coeff3=[-1]
+                        sum_x.extend(x_variables_3)
+                        coeff.extend(coeff3)
+                        d.linear_constraints.add(lin_expr=[cplex.SparsePair(sum_x, coeff)], senses=["G"], rhs=[s])
+                        if len(sum_x)>0:
+                            num_cuts+=1
+                    for ind,val in enumerate(combo_val[0]):
+                        s = (- len(combo_val[1]))  # -|S|
+                        sum_x = []
+                        coeff=[]
+                        indicies_1 = [(o - 1) * Graph.no_edges + (q - 1) for q in combo_val[1]]
+                        x_variables = [x_v[i] for i in indicies_1]
+                        sum_x.extend(x_variables)
+                        coeff1 = [-1 for r in range(len(indicies_1))]
+                        coeff.extend(coeff1)
+                        indicies_2 = [(o - 1) * Graph.no_edges + (q - 1) for q in cut_set_2]
+                        x_variables_1 = [x_v[i] for i in indicies_2]
+                        coeff2 = [1 for r in range(len(indicies_2))]
+                        coeff.extend(coeff2)
+                        sum_x.extend(x_variables_1)
+                        edge_j_k=[val]
+                        indicies_3=[(o - 1) * Graph.no_edges + (q - 1) for q in edge_j_k]
+                        x_variables_3=[x_v[i] for i in indicies_3]
+                        coeff3=[-1]
+                        sum_x.extend(x_variables_3)
+                        coeff.extend(coeff3)
+                        d.linear_constraints.add(lin_expr=[cplex.SparsePair(sum_x, coeff)], senses=["G"], rhs=[s])
+                        if len(sum_x)>0:
+                            num_cuts+=1
+            if sum(C) < len(center_node):
+                a = 1
+                d.solve()
+                center_node1 = [i for i, val in enumerate(d.solution.get_values(w_v)) if val > 0.01]
+                center_node = [i + 1 for i in center_node1]
+                result = []
+                for o in center_node:
+                    result.append(
+                        [Graph.edge_e[i] for i, val in enumerate(d.solution.get_values(x_v)) if val > 0.01 and Graph.node_i[i] == o])
+            else:
+                a = 0
+            print('num_cuts')
+            print(num_cuts)
+            print('num_iterations')
+            print(num_iterations)
 
-            for combo_index, combo_val in enumerate(connected_comp_combin):
-                cut_set_1 = cut_set_for_connected_comb[combo_index][0]
-                cut_set_2 = cut_set_for_connected_comb[combo_index][1]
-                for ind, val in enumerate(combo_val[1]):
-                    s = (- len(combo_val[0]))  # -|S|
-                    sum_x = []
-                    coeff = []
-                    indicies_1 = [(o - 1) * Graph.no_edges + (q - 1) for q in combo_val[0]]
-                    x_variables = [x_v[i] for i in indicies_1]
-                    sum_x.extend(x_variables)
-                    coeff1 = [-1 for r in range(len(indicies_1))]
-                    coeff.extend(coeff1)
-                    indicies_2 = [(o - 1) * Graph.no_edges + (q - 1) for q in cut_set_1]
-                    x_variables_1 = [x_v[i] for i in indicies_2]
-                    coeff2 = [1 for r in range(len(indicies_2))]
-                    coeff.extend(coeff2)
-                    sum_x.extend(x_variables_1)
-                    edge_j_k = [val]
-                    indicies_3 = [(o - 1) * Graph.no_edges + (q - 1) for q in edge_j_k]
-                    x_variables_3 = [x_v[i] for i in indicies_3]
-                    coeff3 = [-1]
-                    sum_x.extend(x_variables_3)
-                    coeff.extend(coeff3)
-                    context.reject_candidate(constraints=[cplex.SparsePair(sum_x, coeff), ], senses="G", rhs=[s, ])
-                for ind, val in enumerate(combo_val[0]):
-                    s = (- len(combo_val[1]))  # -|S|
-                    sum_x = []
-                    coeff = []
-                    indicies_1 = [(o - 1) * Graph.no_edges + (q - 1) for q in combo_val[1]]
-                    x_variables = [x_v[i] for i in indicies_1]
-                    sum_x.extend(x_variables)
-                    coeff1 = [-1 for r in range(len(indicies_1))]
-                    coeff.extend(coeff1)
-                    indicies_2 = [(o - 1) * Graph.no_edges + (q - 1) for q in cut_set_2]
-                    x_variables_1 = [x_v[i] for i in indicies_2]
-                    coeff2 = [1 for r in range(len(indicies_2))]
-                    coeff.extend(coeff2)
-                    sum_x.extend(x_variables_1)
-                    edge_j_k = [val]
-                    indicies_3 = [(o - 1) * Graph.no_edges + (q - 1) for q in edge_j_k]
-                    x_variables_3 = [x_v[i] for i in indicies_3]
-                    coeff3 = [-1]
-                    sum_x.extend(x_variables_3)
-                    coeff.extend(coeff3)
-                    context.reject_candidate(constraints=[cplex.SparsePair(sum_x, coeff), ], senses="G", rhs=[s, ])
-
-    def invoke(self, context):
-        try:
-            if context.in_candidate():
-                self.lazy_contiguity(context)
-        except:
-            info = sys.exc_info()
-            print('#### Exception in callback: ', info[0])
-            print('####                        ', info[1])
-            print('####                        ', info[2])
-            traceback.print_tb(info[2], file=sys.stdout)
-            raise
-
-
-class Model(): # This is the model where we add the variables and the constraints
-    def __init__(self,Graph, x_v, w_v,num):
-        self.x_v=x_v
-        self.w_v=w_v
-        self.Graph=Graph
-        c_org = cplex.Cplex()
-        self.no_threads = 'unlimited'
-        # c_org.parameters.threads.set(self.no_threads)
-        c_org.parameters.mip.strategy.file.set(0)
-
-
-        # Setting the objective function to be Minmization
-        c_org.objective.set_sense(c_org.objective.sense.minimize)
-        # Declare decision variables (first argument is decision variables names, second argument is type of decision variables,
-        # third argument is objective function coefficients)
-        nodetoedge_net_dist_list = Graph.nodetoedge_net_dist.stack().tolist()  # converting the dataframe into a list
-        c_org.variables.add(names=x_v, types=["B"] * len(x_v), obj=nodetoedge_net_dist_list)
-        c_org.variables.add(names=w_v, types=["B"] * len(w_v))
-        c_main=constraints_wo_cuts(c_org, Graph, num, x_v, w_v)
-        self.c_main=c_main
-
-    def branch_bound_cut(self): # This is the method that has the branch and bound and cut
-        x_v = self.x_v
-        w_v = self.w_v
-        Graph = self.Graph
-        c_1=self.c_main
-        t0 = time.time()
-        d=c_1
-        d.parameters.clocktype.set(2)
-        d.parameters.timelimit.set(43200)
-        contiguity_callback = Contiguity_Lazy_Callback(x_v, w_v, Graph)
-        contextmask = cplex.callbacks.Context.id.candidate
-        d.set_callback(contiguity_callback, contextmask)
-        d.solve()
-        l_1 = round(time.time() - t0, 2)
-        print('Time to Solve Using Branch and Cut')
-        print(l_1)
+        l_2 = round(time.time() - t1, 2)
         sol_1 = [x_v[i] for i, j in enumerate(d.solution.get_values(x_v)) if j > 0.01]
         sol_2 = [w_v[i] for i, j in enumerate(d.solution.get_values(w_v)) if j > 0.01]
         obj = d.solution.get_objective_value()
@@ -337,7 +347,7 @@ class Model(): # This is the model where we add the variables and the constraint
         print(sol_2)
         print(obj)
 
-        return obj,l_1,d
+        return obj,l_1,l_2,num_iterations, num_cuts,d
 
     def solve_poly_cont(self):
         Graph = self.Graph
@@ -363,10 +373,13 @@ class Model(): # This is the model where we add the variables and the constraint
 
 
 def execute_task(task):
-    print(f"Instance Name {task[0]}")
-    print(f"No. of Districts {task[1]}")
-    prob=task[0]
-    num=task[1]
+    print(f"Model Name {task[0]}")
+    print(f"Instance Name {task[1]}")
+    print(f"No. of Districts {task[2]}")
+    print(f"Balance Tolerance {task[3]}")
+    prob=task[1]
+    num=task[2]
+    tol=task[3]
     graph = Graph(prob)
     nodes_list = graph.nodes_list
     edges_list = graph.edges_list
@@ -387,23 +400,25 @@ def execute_task(task):
         w_v.append(w)
 
     distr_v = list(range(1, num + 1))  # Districts vector
-    model_bbb = Model(graph, x_v, w_v, num)
+    model_bbb = Model(graph, x_v, w_v, num, tol)
     no_threads = model_bbb.no_threads
-    with open('Results/Cut_Empty/'+str(no_threads)+'_threads/ECPM_Cut_Set_vs_SP_Contiguity_no_dist_' + str(num) + '_prob_' + str(prob) + '.csv',
+    with open('Results/Cut_Empty/'+str(no_threads)+'_threads/EBD_Cut_Set_vs_SP_Contiguity_no_dist_' + str(num) +'_tol_'+str(tol)+ '_prob_' + str(prob) + '.csv',
               'w') as newFile:
         print('Directory')
-        print('Results/Cut_Empty/'+str(no_threads)+'_threads/ECPM_Cut_Set_vs_SP_Contiguity_no_dist_' + str(num) + '_prob_' + str(prob) + '.csv')
+        print('Results/Cut_Empty/'+str(no_threads)+'_threads/EBD_Cut_Set_vs_SP_Contiguity_no_dist_' + str(num) +'_tol_'+str(tol)+ '_prob_' + str(prob) + '.csv')
         newFileWriter = csv.writer(newFile, lineterminator='\n')
         newFileWriter.writerow(['num_threads'])
         newFileWriter.writerow([no_threads])
 
         try:
-            newFileWriter.writerow(['Computation Time_for_Branch_Cut', 'Objective Function'])
-            obj, l_1, d = model_bbb.branch_bound_cut()
+            newFileWriter.writerow(['Computation Time_before_BBB', 'Objective Function'])
+            obj, l_1, l_2, num_iterations, num_cuts, d = model_bbb.branch_bound_cut()
             lower_bound = d.solution.MIP.get_best_objective()
             relative_gap = d.solution.MIP.get_mip_relative_gap()
             soln_status = d.solution.get_status_string()
             newFileWriter.writerow([l_1, round(obj, 2)])
+            newFileWriter.writerow(['Computation Time_for_BBB','num_iterations', 'num_cuts'])
+            newFileWriter.writerow([l_2, num_iterations, num_cuts])
             newFileWriter.writerow(['Lower_Bound', 'Relative Gap', 'Solution Status'])
             newFileWriter.writerow([round(lower_bound, 2), relative_gap, soln_status])
         except cplex.exceptions.CplexError as e:
@@ -413,7 +428,7 @@ def execute_task(task):
 
         # print('Start of SPC Formulation')
         # try:
-        #     model_sp_cont = Model(graph, x_v, w_v, num)
+        #     model_sp_cont = Model(graph, x_v, w_v, num, tol)
         #     obj, l_1, c = model_sp_cont.solve_poly_cont()
         #     lower_bound_w_cuts = c.solution.MIP.get_best_objective()
         #     relative_gap_w_cuts = c.solution.MIP.get_mip_relative_gap()
@@ -436,14 +451,12 @@ def execute_task(task):
 if __name__ == "__main__":
     # List of tasks: [Model Name, Problem File Name, Number of Districts, Balance Tolerance]
     task_list = [
-        # [ "CARP_F6_p_graph.dat", 2],
-        # ["CARP_F6_p_graph.dat", 10],
-        # ["CARP_O12_g_graph.dat", 2],
-        # ["CARP_O12_g_graph.dat", 10],
-        # ["CARP_N16_g_graph.dat", 2],
-        # ["CARP_N16_g_graph.dat", 10],
-        ["CARP_S9_g_graph.dat", 2],
-        ["CARP_S9_g_graph.dat", 10]
+        ["EBD_SP_Cut_Empty", "CARP_F15_g_graph.dat", 2, 0.01],
+        # ["EBD_SP_Cut_Empty", "CARP_F6_p_graph.dat", 4, 0.01],
+        # ["EBD_SP_Cut_Empty", "CARP_F6_p_graph.dat", 6, 0.01],
+        # ["EBD_SP_Cut_Empty", "CARP_S9_p_graph.dat", 2, 0.01],
+        # ["EBD_SP_Cut_Empty", "CARP_S9_p_graph.dat", 4, 0.01],
+        # ["EBD_SP_Cut_Empty", "CARP_S9_p_graph.dat", 6, 0.01],
         # Add more tasks here as needed
     ]
 
