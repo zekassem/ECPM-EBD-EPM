@@ -27,6 +27,7 @@ class Graph():
             self.edges[self.to_node_j[i] + 1].append(i + 1)
 
         self.edge_lengths = np.loadtxt(self.file, skiprows=9, max_rows=self.no_edges1, usecols=4, dtype=float)
+        self.demand = np.loadtxt(self.file, skiprows=9, max_rows=self.no_edges1, usecols=5, dtype=float)
         # This block calculates the length of each edge
         index = 0
         self.euc_dist = collections.defaultdict(
@@ -88,6 +89,10 @@ class Graph():
         self.euc_dist_edge_index = {}  # creating a dictionary that has the length of each edge using the edge index
         for index, i in enumerate(self.from_node_i):
             self.euc_dist_edge_index[index + 1] = self.edge_lengths[index]
+
+        self.demand_edge_index = {}  # creating a dictionary that has the length of each edge using the edge index
+        for index, i in enumerate(self.from_node_i):
+            self.demand_edge_index[index + 1] = self.demand[index]
 
         self.nodetoedge_net_dist = pd.read_csv("nodetoedge_distance_" + str(prob) + ".csv", header=0, index_col=0)
         self.nodetoedge_path = pd.read_csv("nodetoedge_path_" + str(prob) + ".csv", index_col=0, header=0)
@@ -151,18 +156,19 @@ def constraints_wo_cuts(problem, Graph, no_dist,tol, x_v, w_v): #  This function
     sum_x = []
     coeff = []
     # Balancing Constraints
+    # Balancing Constraints
     # sum e e E le xie <= sum(le)/p * (1+tau) wi for i e V
-    rhs_1 = (sum(Graph.euc_dist_edge_index.values()) / no_dist) * (1 + tol)
+    rhs_1 = (sum(Graph.demand_edge_index.values()) / no_dist) * (1 + tol)
 
     expr = [cplex.SparsePair([w_v[i - 1]] + x_v[(i - 1) * Graph.no_edges:i * Graph.no_edges],
-                             [-rhs_1] + list(Graph.euc_dist_edge_index.values())) for i in Graph.nodes_list]
+                             [-rhs_1] + list(Graph.demand_edge_index.values())) for i in Graph.nodes_list]
     sens = ["L"] * len(expr)
     rhs = [0] * len(expr)
     problem.linear_constraints.add(lin_expr=expr, senses=sens, rhs=rhs)
     # sum e e E le xie >= sum(le)/p * (1-tau) wi for i e V
-    rhs_2 = (sum(Graph.euc_dist_edge_index.values()) / no_dist) * (1 - tol)
+    rhs_2 = (sum(Graph.demand_edge_index.values()) / no_dist) * (1 - tol)
     expr = [cplex.SparsePair([w_v[i - 1]] + x_v[(i - 1) * Graph.no_edges:i * Graph.no_edges],
-                             [-rhs_2] + list(Graph.euc_dist_edge_index.values())) for i in Graph.nodes_list]
+                             [-rhs_2] + list(Graph.demand_edge_index.values())) for i in Graph.nodes_list]
     rhs = [0] * len(expr)
     sens = ["G"] * len(expr)
     problem.linear_constraints.add(lin_expr=expr, senses=sens, rhs=rhs)
@@ -188,8 +194,7 @@ class Model(): # This is the model where we add the variables and the constraint
         c_org = cplex.Cplex()
         self.no_threads = 'unlimited'
         # c_org.parameters.threads.set(self.no_threads)
-        c_org.parameters.mip.strategy.file.set(3)
-        c_org.parameters.workdir.set('/scratch/zekassem/nodefile')
+        c_org.parameters.mip.strategy.file.set(0)
         # Setting the objective function to be Minmization
         c_org.objective.set_sense(c_org.objective.sense.minimize)
         # Declare decision variables (first argument is decision variables names, second argument is type of decision variables,
@@ -442,3 +447,21 @@ def execute_task(task):
 # For testing purposes
 # task=['EBD_SP_Cut_Empty','CARP_N17_g_graph.dat',50,1]
 # execute_task(task)
+
+if __name__ == "__main__":
+    # List of tasks: [Model Name, Problem File Name, Number of Districts, Balance Tolerance]
+    task_list = [
+        ["EBD_SP_Cut_Empty", "CARP_F15_g_graph.dat", 2, 0.01],
+        # ["EBD_SP_Cut_Empty", "CARP_F6_p_graph.dat", 4, 0.01],
+        # ["EBD_SP_Cut_Empty", "CARP_F6_p_graph.dat", 6, 0.01],
+        # ["EBD_SP_Cut_Empty", "CARP_S9_p_graph.dat", 2, 0.01],
+        # ["EBD_SP_Cut_Empty", "CARP_S9_p_graph.dat", 4, 0.01],
+        # ["EBD_SP_Cut_Empty", "CARP_S9_p_graph.dat", 6, 0.01],
+        # Add more tasks here as needed
+    ]
+
+    for task in task_list:
+        try:
+            execute_task(task)
+        except Exception as e:
+            print(f"Error while executing task {task}: {e}")
