@@ -300,8 +300,8 @@ class Model(): # This is the model where we add the variables and the constraint
         c_org = cplex.Cplex()
         self.no_threads = 'unlimited'
         # c_org.parameters.threads.set(self.no_threads)
-        c_org.parameters.mip.strategy.file.set(3)
-        c_org.parameters.workdir.set('/scratch/zekassem/nodefile')
+        c_org.parameters.mip.strategy.file.set(0)
+
 
         # Setting the objective function to be Minmization
         c_org.objective.set_sense(c_org.objective.sense.minimize)
@@ -411,24 +411,44 @@ def execute_task(task):
             newFileWriter.writerow(['CPLEX Error'])
             newFileWriter.writerow([e])
 
-        print('Start of SPC Formulation')
-        try:
-            model_sp_cont = Model(graph, x_v, w_v, num)
-            obj, l_1, c = model_sp_cont.solve_poly_cont()
-            lower_bound_w_cuts = c.solution.MIP.get_best_objective()
-            relative_gap_w_cuts = c.solution.MIP.get_mip_relative_gap()
-            soln_status_w_cuts = c.solution.get_status_string()
-            newFileWriter.writerow(['Computation Time_Empty_SP_Cont', 'Objective Function'])
-            newFileWriter.writerow([l_1, round(obj, 2)])
-            newFileWriter.writerow(['Lower_Bound','Relative Gap','Solution Status'])
-            newFileWriter.writerow([round(lower_bound_w_cuts, 2),relative_gap_w_cuts,soln_status_w_cuts])
-        except cplex.exceptions.CplexError as e:
-            print("CPLEX Error", e)
-            newFileWriter.writerow(['CPLEX Error'])
-            newFileWriter.writerow([e])
+        # print('Start of SPC Formulation')
+        # try:
+        #     model_sp_cont = Model(graph, x_v, w_v, num)
+        #     obj, l_1, c = model_sp_cont.solve_poly_cont()
+        #     lower_bound_w_cuts = c.solution.MIP.get_best_objective()
+        #     relative_gap_w_cuts = c.solution.MIP.get_mip_relative_gap()
+        #     soln_status_w_cuts = c.solution.get_status_string()
+        #     newFileWriter.writerow(['Computation Time_Empty_SP_Cont', 'Objective Function'])
+        #     newFileWriter.writerow([l_1, round(obj, 2)])
+        #     newFileWriter.writerow(['Lower_Bound','Relative Gap','Solution Status'])
+        #     newFileWriter.writerow([round(lower_bound_w_cuts, 2),relative_gap_w_cuts,soln_status_w_cuts])
+        # except cplex.exceptions.CplexError as e:
+        #     print("CPLEX Error", e)
+        #     newFileWriter.writerow(['CPLEX Error'])
+        #     newFileWriter.writerow([e])
 
 
 
 # For testing purposes
 # task=['EBD_SP_Cut_Empty','CARP_N17_g_graph.dat',50,1]
 # execute_task(task)
+
+if __name__ == "__main__":
+    # List of tasks: [Model Name, Problem File Name, Number of Districts, Balance Tolerance]
+    task_list = [
+        # [ "CARP_F6_p_graph.dat", 2],
+        # ["CARP_F6_p_graph.dat", 10],
+        # ["CARP_O12_g_graph.dat", 2],
+        # ["CARP_O12_g_graph.dat", 10],
+        # ["CARP_N16_g_graph.dat", 2],
+        # ["CARP_N16_g_graph.dat", 10],
+        ["CARP_S9_g_graph.dat", 2],
+        ["CARP_S9_g_graph.dat", 10]
+        # Add more tasks here as needed
+    ]
+
+    for task in task_list:
+        try:
+            execute_task(task)
+        except Exception as e:
+            print(f"Error while executing task {task}: {e}")
