@@ -1,0 +1,10 @@
+num_threads
+unlimited
+Computation Time_for_Branch_Cut,Objective Function
+5641.98,34475.0
+Lower_Bound,Relative Gap,Solution Status
+34475.0,0.0,integer optimal solution
+Computation Time_Empty_SP_Cont,Objective Function
+135.89,34475.0
+Lower_Bound,Relative Gap,Solution Status
+34475.0,0.0,integer optimal solution
