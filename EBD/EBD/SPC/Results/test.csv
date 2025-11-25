@@ -1,0 +1,7 @@
+,RN Name,tolerance,Total_Time_SP,No. of Infeasible Instances,No. of Instance that Reached Time Limit,No. of Instance that Could Not Find Feasible Solution Within Time Limit
+0,F6\_p,0.01,36726.67,4.0,3.0,3.0
+1,F6\_p,0.1,30564.19777777778,0.0,5.0,5.0
+2,F6\_p,1.0,2166.6566666666668,0.0,0.0,0.0
+3,O12\_g,0.01,19544.17,4.0,1.0,1.0
+4,O12\_g,0.1,7490.916,3.0,0.0,0.0
+5,O12\_g,1.0,8762.638888888889,0.0,0.0,0.0
