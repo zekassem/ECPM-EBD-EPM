@@ -1,0 +1,2 @@
+Instance_no,Instance_name,No. of Nodes,No. of Edges,No. of Districts,tolerance,No. of Threads,Time_SP_Const,Time_to_print_path,Total_Time_SP,Objective_Function_SPC,Sol_Status_SP_Const,gap,Instance_no_df2,No. of Nodes_df2,No. of Edges_df2,No. of Threads_df2,Time_B&C_Const,Objective_Function_B&C,Sol_Status_B&C,gap_df2,Deviation
+27,CARP_F6_p_graph.dat,502,741,50,1.0,unlimited,239.09,6.710000000000001,245.8,16514.0,integer optimal solution,0.0,6,502,741,unlimited,9807.5,16376.0,"""integer optimal",0.01,0.008356545961002786
