@@ -411,21 +411,21 @@ def execute_task(task):
             newFileWriter.writerow(['CPLEX Error'])
             newFileWriter.writerow([e])
 
-        # print('Start of SPC Formulation')
-        # try:
-        #     model_sp_cont = Model(graph, x_v, w_v, num)
-        #     obj, l_1, c = model_sp_cont.solve_poly_cont()
-        #     lower_bound_w_cuts = c.solution.MIP.get_best_objective()
-        #     relative_gap_w_cuts = c.solution.MIP.get_mip_relative_gap()
-        #     soln_status_w_cuts = c.solution.get_status_string()
-        #     newFileWriter.writerow(['Computation Time_Empty_SP_Cont', 'Objective Function'])
-        #     newFileWriter.writerow([l_1, round(obj, 2)])
-        #     newFileWriter.writerow(['Lower_Bound','Relative Gap','Solution Status'])
-        #     newFileWriter.writerow([round(lower_bound_w_cuts, 2),relative_gap_w_cuts,soln_status_w_cuts])
-        # except cplex.exceptions.CplexError as e:
-        #     print("CPLEX Error", e)
-        #     newFileWriter.writerow(['CPLEX Error'])
-        #     newFileWriter.writerow([e])
+        print('Start of SPC Formulation')
+        try:
+            model_sp_cont = Model(graph, x_v, w_v, num)
+            obj, l_1, c = model_sp_cont.solve_poly_cont()
+            lower_bound_w_cuts = c.solution.MIP.get_best_objective()
+            relative_gap_w_cuts = c.solution.MIP.get_mip_relative_gap()
+            soln_status_w_cuts = c.solution.get_status_string()
+            newFileWriter.writerow(['Computation Time_Empty_SP_Cont', 'Objective Function'])
+            newFileWriter.writerow([l_1, round(obj, 2)])
+            newFileWriter.writerow(['Lower_Bound','Relative Gap','Solution Status'])
+            newFileWriter.writerow([round(lower_bound_w_cuts, 2),relative_gap_w_cuts,soln_status_w_cuts])
+        except cplex.exceptions.CplexError as e:
+            print("CPLEX Error", e)
+            newFileWriter.writerow(['CPLEX Error'])
+            newFileWriter.writerow([e])
 
 
 
