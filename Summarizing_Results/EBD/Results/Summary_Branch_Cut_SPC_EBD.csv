@@ -1,0 +1,55 @@
+Instance_no,Instance_name,No. of Nodes,No. of Edges,No. of Districts,tolerance,No. of Threads,Time_SP_Const,Time_to_print_path,Total_Time_SP,Objective_Function_SPC,Sol_Status_SP_Const,gap,Comments
+1.00,CARP_F6_p_graph.dat,502.00,741.00,2.00,0.01,unlimited,42179.00,6.71,42186.00,427501.00,"""integer optimal",0.00,
+2.00,CARP_F6_p_graph.dat,502.00,741.00,2.00,0.10,unlimited,25620.68,6.71,25627.00,425897.00,"""integer optimal",0.01,
+3.00,CARP_F6_p_graph.dat,502.00,741.00,2.00,0.50,unlimited,18941.89,6.71,18949.00,389625.00,"""integer optimal",0.00,
+4.00,CARP_F6_p_graph.dat,502.00,741.00,4.00,0.01,unlimited,11554.00,6.71,11560.00,237008.00,"""integer optimal",0.01,
+5.00,CARP_F6_p_graph.dat,502.00,741.00,4.00,0.10,unlimited,16621.79,6.71,16629.00,229996.00,"""integer optimal",0.01,
+6.00,CARP_F6_p_graph.dat,502.00,741.00,4.00,0.50,unlimited,3542.18,6.71,3549.00,205679.00,"""integer optimal",0.01,
+7.00,CARP_F6_p_graph.dat,502.00,741.00,6.00,0.01,unlimited,43287.00,6.71,43294.00,184601.00,time limit exceeded,7.55,
+8.00,CARP_F6_p_graph.dat,502.00,741.00,6.00,0.10,unlimited,13152.77,6.71,13159.00,173171.00,"""integer optimal",0.00,
+9.00,CARP_F6_p_graph.dat,502.00,741.00,6.00,0.50,unlimited,1724.69,6.71,1731.00,156182.00,"""integer optimal",0.00,
+10.00,CARP_F6_p_graph.dat,502.00,741.00,8.00,0.01,unlimited,43303.00,6.71,43310.00,169809.00,time limit exceeded,12.31,
+11.00,CARP_F6_p_graph.dat,502.00,741.00,8.00,0.10,unlimited,43233.23,6.71,43240.00,153880.00,time limit exceeded,7.04,
+12.00,CARP_F6_p_graph.dat,502.00,741.00,8.00,0.50,unlimited,1024.32,6.71,1031.00,121919.00,"""integer optimal",0.01,
+13.00,CARP_F6_p_graph.dat,502.00,741.00,10.00,0.01,unlimited,43277.00,6.71,43284.00,133713.00,time limit exceeded,6.71,
+14.00,CARP_F6_p_graph.dat,502.00,741.00,10.00,0.10,unlimited,43231.97,6.71,43239.00,123326.00,time limit exceeded,2.50,
+15.00,CARP_F6_p_graph.dat,502.00,741.00,10.00,0.50,unlimited,584.93,6.71,592.00,103185.00,"""integer optimal",0.01,
+16.00,CARP_F6_p_graph.dat,502.00,741.00,20.00,0.01,unlimited,,,,,CPLEX Error  1217: No solution exists.,,Infeasible
+17.00,CARP_F6_p_graph.dat,502.00,741.00,20.00,0.10,unlimited,43273.27,6.71,43280.00,69059.00,time limit exceeded,0.98,
+18.00,CARP_F6_p_graph.dat,502.00,741.00,20.00,0.50,unlimited,232.89,6.71,240.00,55066.00,integer optimal solution,0.00,
+19.00,CARP_F6_p_graph.dat,502.00,741.00,30.00,0.01,unlimited,,,,,CPLEX Error  1217: No solution exists.,,Infeasible
+20.00,CARP_F6_p_graph.dat,502.00,741.00,30.00,0.10,unlimited,43365.78,6.71,43372.00,48713.00,time limit exceeded,6.74,
+21.00,CARP_F6_p_graph.dat,502.00,741.00,30.00,0.50,unlimited,337.49,6.71,344.00,36054.00,"""integer optimal",0.01,
+22.00,CARP_F6_p_graph.dat,502.00,741.00,40.00,0.01,unlimited,,,,,CPLEX Error  1217: No solution exists.,,Infeasible
+23.00,CARP_F6_p_graph.dat,502.00,741.00,40.00,0.10,unlimited,3173.75,6.71,3180.00,36341.00,"""integer optimal",0.01,
+24.00,CARP_F6_p_graph.dat,502.00,741.00,40.00,0.50,unlimited,294.32,6.71,301.00,26900.00,"""integer optimal",0.01,
+25.00,CARP_F6_p_graph.dat,502.00,741.00,50.00,0.01,unlimited,,,,,CPLEX Error  1217: No solution exists.,,Infeasible
+26.00,CARP_F6_p_graph.dat,502.00,741.00,50.00,0.10,unlimited,43344.15,6.71,43351.00,32446.00,time limit exceeded,7.42,
+27.00,CARP_F6_p_graph.dat,502.00,741.00,50.00,0.50,unlimited,348.11,6.71,355.00,20993.00,"""integer optimal",0.01,
+28.00,CARP_O12_g_graph.dat,761.00,852.00,2.00,0.01,unlimited,5268.59,20.32,5289.00,913496.00,integer optimal solution,0.00,
+29.00,CARP_O12_g_graph.dat,761.00,852.00,2.00,0.10,unlimited,5278.00,20.32,5298.00,911421.00,integer optimal solution,0.00,
+30.00,CARP_O12_g_graph.dat,761.00,852.00,2.00,0.50,unlimited,8270.94,20.32,8291.00,911421.00,integer optimal solution,0.00,
+31.00,CARP_O12_g_graph.dat,761.00,852.00,4.00,0.01,unlimited,5796.69,20.32,5817.00,632813.00,"""integer optimal",0.01,
+32.00,CARP_O12_g_graph.dat,761.00,852.00,4.00,0.10,unlimited,4121.00,20.32,4141.00,600710.00,integer optimal solution,0.00,
+33.00,CARP_O12_g_graph.dat,761.00,852.00,4.00,0.50,unlimited,5312.05,20.32,5332.00,600402.00,"""integer optimal",0.01,
+34.00,CARP_O12_g_graph.dat,761.00,852.00,6.00,0.01,unlimited,23745.36,20.32,23766.00,573024.00,"""integer optimal",0.01,
+35.00,CARP_O12_g_graph.dat,761.00,852.00,6.00,0.10,unlimited,18640.00,20.32,18660.00,552065.00,"""integer optimal",0.01,
+36.00,CARP_O12_g_graph.dat,761.00,852.00,6.00,0.50,unlimited,5275.86,20.32,5296.00,445806.00,integer optimal solution,0.00,
+37.00,CARP_O12_g_graph.dat,761.00,852.00,8.00,0.01,unlimited,,,,,CPLEX Error  1217: No solution exists.,,CF
+38.00,CARP_O12_g_graph.dat,761.00,852.00,8.00,0.10,unlimited,,,,,CPLEX Error  1217: No solution exists.,,CF
+39.00,CARP_O12_g_graph.dat,761.00,852.00,8.00,0.50,unlimited,6790.00,20.32,6810.00,390465.00,"""integer optimal",0.01,
+40.00,CARP_O12_g_graph.dat,761.00,852.00,10.00,0.01,unlimited,43284.76,20.32,43305.00,510863.00,time limit exceeded,22.85,
+41.00,CARP_O12_g_graph.dat,761.00,852.00,10.00,0.10,unlimited,3952.00,20.32,3972.00,381478.00,"""integer optimal",0.01,
+42.00,CARP_O12_g_graph.dat,761.00,852.00,10.00,0.50,unlimited,4850.20,20.32,4871.00,330057.00,"""integer optimal",0.01,
+43.00,CARP_O12_g_graph.dat,761.00,852.00,20.00,0.01,unlimited,,,,,CPLEX Error  1217: No solution exists.,,Infeasible
+44.00,CARP_O12_g_graph.dat,761.00,852.00,20.00,0.10,unlimited,5362.00,20.32,5383.00,228857.00,integer optimal solution,0.00,
+45.00,CARP_O12_g_graph.dat,761.00,852.00,20.00,0.50,unlimited,13322.61,20.32,13343.00,198304.00,"""integer optimal",0.01,
+46.00,CARP_O12_g_graph.dat,761.00,852.00,30.00,0.01,unlimited,,,,,CPLEX Error  1217: No solution exists.,,Infeasible
+47.00,CARP_O12_g_graph.dat,761.00,852.00,30.00,0.10,unlimited,,,,,CPLEX Error  1217: No solution exists.,,Infeasible
+48.00,CARP_O12_g_graph.dat,761.00,852.00,30.00,0.50,unlimited,5523.66,20.32,5544.00,144093.00,"""integer optimal",0.01,
+49.00,CARP_O12_g_graph.dat,761.00,852.00,40.00,0.01,unlimited,,,,,CPLEX Error  1217: No solution exists.,,Infeasible
+50.00,CARP_O12_g_graph.dat,761.00,852.00,40.00,0.10,unlimited,,,,,CPLEX Error  1217: No solution exists.,,Infeasible
+51.00,CARP_O12_g_graph.dat,761.00,852.00,40.00,0.50,unlimited,7883.64,20.32,7904.00,110803.00,"""integer optimal",0.01,
+52.00,CARP_O12_g_graph.dat,761.00,852.00,50.00,0.01,unlimited,,,,,CPLEX Error  1217: No solution exists.,,Infeasible
+53.00,CARP_O12_g_graph.dat,761.00,852.00,50.00,0.10,unlimited,,,,,CPLEX Error  1217: No solution exists.,,Infeasible
+54.00,CARP_O12_g_graph.dat,761.00,852.00,50.00,0.50,unlimited,2421.83,20.32,2442.00,84818.00,"""integer optimal",0.01,

@@ -1,6 +1,0 @@
-num_threads
-unlimited
-Computation Time_EPM,Objective Function
-5395.9,299226.0
-Lower_Bound,Relative Gap,Solution Status
-299226.0,0.0,integer optimal solution
