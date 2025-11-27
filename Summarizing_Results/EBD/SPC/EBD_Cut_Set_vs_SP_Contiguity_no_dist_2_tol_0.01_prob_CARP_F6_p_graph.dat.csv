@@ -1,6 +1,0 @@
-num_threads
-unlimited
-Computation Time_Empty_SP_Cont,Objective Function
-42178.91,427501.0
-Lower_Bound,Relative Gap,Solution Status
-427486.53,3.384925002585014e-05,"integer optimal, tolerance"

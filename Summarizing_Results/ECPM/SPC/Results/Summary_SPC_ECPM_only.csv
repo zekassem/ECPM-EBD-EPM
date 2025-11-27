@@ -1,7 +1,0 @@
-Instance_no,Instance_name,No. of Nodes,No. of Edges,No. of Districts,No. of Threads,Time_SP_Const,Time_to_print_path,Total_Time_SP,Objective_Function_SPC,Sol_Status_SP_Const
-1,CARP_K9_g_graph.dat,2773,3472,2,unlimited,30256.53,498.25,30754.78,27252465.0,integer optimal solution
-2,CARP_K9_g_graph.dat,2773,3472,10,unlimited,25703.09,498.25,26201.34,9057443.0,integer optimal solution
-3,CARP_K9_g_graph.dat,2773,3472,30,unlimited,15586.29,498.25,16084.54,4265870.0,integer optimal solution
-4,CARP_K9_g_graph.dat,2773,3472,40,unlimited,11542.71,498.25,12040.96,3454230.0,integer optimal solution
-5,CARP_K9_g_graph.dat,2773,3472,50,unlimited,8710.24,498.25,9208.49,2959009.0,integer optimal solution
-6,CARP_K9_g_graph.dat,2773,3472,100,unlimited,6492.75,498.25,6991.0,1718557.0,"""integer optimal"
