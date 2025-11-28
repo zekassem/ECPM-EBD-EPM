@@ -161,8 +161,10 @@ def Dijkstras_Algo(Graph): # Lazy Implementation of Dijkstra's Algorithm
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 probs_list=['CARP_F15_g_graph.dat', 'CARP_N17_g_graph.dat', 'CARP_K13_g_graph.dat', 
-            'CARP_N16_g_graph.dat', 'CARP_S11_g_graph.dat', 'CARP_K9_p_graph.dat',
-            'CARP_N11_g_graph.dat', 'CARP_N15_g_graph.dat', 'CARP_K9_g_graph.dat']
+            'CARP_F6_p_graph.dat', 'CARP_O12_g_graph.dat', 'CARP_S9_p_graph.dat',
+            'CARP_N16_g_graph.dat', 'CARP_S9_g_graph.dat', 'CARP_S11_g_graph.dat', 
+            'CARP_K9_p_graph.dat', 'CARP_N11_g_graph.dat', 'CARP_N15_g_graph.dat',
+            'CARP_N9_g_graph.dat', 'CARP_K9_g_graph.dat']
 
 for prob in probs_list:
     # Use absolute path for the input file
