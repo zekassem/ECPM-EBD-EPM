@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import time
 import csv
+import os
 # Loading Data
 
 class Graph():
@@ -156,16 +157,28 @@ def Dijkstras_Algo(Graph): # Lazy Implementation of Dijkstra's Algorithm
 
     return nodetoedge_net_dist,nodetoedge_path,extra_time
 
-probs_list=['CARP_N9_g_graph.dat','CARP_N6_p_graph.dat']
+# Get the directory where the script is located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+probs_list=['CARP_F15_g_graph.dat', 'CARP_N17_g_graph.dat', 'CARP_K13_g_graph.dat', 
+            'CARP_F6_p_graph.dat', 'CARP_O12_g_graph.dat', 'CARP_S9_p_graph.dat',
+            'CARP_N16_g_graph.dat', 'CARP_S9_g_graph.dat', 'CARP_S11_g_graph.dat', 
+            'CARP_K9_p_graph.dat', 'CARP_N11_g_graph.dat', 'CARP_N15_g_graph.dat',
+            'CARP_N9_g_graph.dat', 'CARP_K9_g_graph.dat']
 
 for prob in probs_list:
-    graph=Graph(prob)
+    # Use absolute path for the input file
+    prob_path = os.path.join(script_dir, prob)
+    graph=Graph(prob_path)
     nodetoedge_net_dist,nodetoedge_path,extra_time=Dijkstras_Algo(graph)
     df=pd.DataFrame(nodetoedge_net_dist).transpose() # Gets the transpose of the dataframe
-    df.to_csv("nodetoedge_distance_"+str(prob)+".csv",header=True,index=True) # Spits out the shortest path distance from each node (row index) to each edge (column index)
+    df.to_csv(os.path.join(script_dir, "nodetoedge_distance_"+str(prob)+".csv"),header=True,index=True) # Spits out the shortest path distance from each node (row index) to each edge (column index)
     df_2=pd.DataFrame(nodetoedge_path).transpose() # Gets the transpose of the dataframe
-    df_2.to_csv("nodetoedge_path_"+str(prob)+".csv") # Spits out the shortest path from each node (row index) to each edge (column index)
-    with open('Results/time_print_path_'+str(prob)+'.csv',
+    df_2.to_csv(os.path.join(script_dir, "nodetoedge_path_"+str(prob)+".csv")) # Spits out the shortest path from each node (row index) to each edge (column index)
+    # Ensure Results directory exists
+    results_dir = os.path.join(script_dir, 'Results')
+    os.makedirs(results_dir, exist_ok=True)
+    with open(os.path.join(results_dir, 'time_print_path_'+str(prob)+'.csv'),
               'w') as newFile:
         newFileWriter = csv.writer(newFile, lineterminator='\n')
         newFileWriter.writerow(['Extra_time'])
