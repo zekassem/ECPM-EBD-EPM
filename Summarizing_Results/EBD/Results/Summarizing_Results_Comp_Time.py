@@ -54,7 +54,7 @@ df_tolerance['No. of Instance that Could Not Find Feasible Solution Within Time 
 
 
 
-df_tolerance['RN No.']=df_tolerance['RN Name'].apply(lambda x: 4 if x=='F6\_p' else 5)
+df_tolerance['RN No.']=df_tolerance['RN Name'].apply(lambda x: 4 if x==r'F6\_p' else 5)
 result_final=df_tolerance[['RN No.','tolerance','Total_Time_SP','No. of Optimal Instances','No. of Instance that Reached Time Limit','No. of Infeasible Instances','No. of Instance that Could Not Find Feasible Solution Within Time Limit']]
 result_final['Total_Time_SP']=result_final['Total_Time_SP']/(60*60)
 result_final.to_csv('results.csv')
@@ -63,7 +63,7 @@ latex_code = result_final.to_latex(index=False, escape=False,formatters={'tolera
 with open('dataframe_table_2.tex', 'w') as file:
     file.write(latex_code)
 
-Average_by_District['RN No.']=Average_by_District['RN Name'].apply(lambda x: 4 if x=='F6\_p' else 5)
+Average_by_District['RN No.']=Average_by_District['RN Name'].apply(lambda x: 4 if x==r'F6\_p' else 5)
 result_final_1=Average_by_District[['RN No.','No. of Districts','Total_Time_SP']]
 
 result_final_1.to_csv('Average_By_District.csv')
@@ -84,7 +84,7 @@ plt.show()
 
 
 
-gap_analysis['RN No.']=gap_analysis['RN Name'].apply(lambda x: 4 if x=='F6\_p' else 5)
+gap_analysis['RN No.']=gap_analysis['RN Name'].apply(lambda x: 4 if x==r'F6\_p' else 5)
 gap_analysis=gap_analysis[['RN No.','tolerance','mean_gap','max_gap']]
 gap_analysis['mean_gap']=gap_analysis['mean_gap']/100
 gap_analysis['max_gap']=gap_analysis['max_gap']/100
