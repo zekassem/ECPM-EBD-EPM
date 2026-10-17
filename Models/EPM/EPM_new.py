@@ -656,10 +656,10 @@ def execute_task(task):
     #no_threads = model_bbb.no_threads
     model_sp_cont = Model(graph, x_v, w_v, num, tol,use_balance_constraints, cut1, cut2, cut3)
     no_threads = model_sp_cont.no_threads
-    with open('epmr/EpM_Cut_Empty' + str(num) +'_tol_'+str(tol)+ '_epms3_' + str(prob) + '_balance_' + str(use_balance_constraints) + '_cut1_' + str(cut1) + '_cut2_' + str(cut2)  + '_PVI_' + str(cut3) + '.csv',
+    with open('epmr/EPM_new' + str(num) +'_tol_'+str(tol)+ '_epms3_' + str(prob) + '_balance_' + str(use_balance_constraints) + '_cut1_' + str(cut1) + '_cut2_' + str(cut2)  + '_PVI_' + str(cut3) + '.csv',
               'w') as newFile:
         print('Directory')
-        print('epmr/EpM_Cut_Empty' + str(num) +'_tol_'+str(tol)+ '_epms3_' + str(prob) + '_balance_' + str(use_balance_constraints) + '_cut1_' + str(cut1) + '_cut2_' + str(cut2) + '_PVI_' + str(cut3)  + '.csv')
+        print('epmr/EPM_new' + str(num) +'_tol_'+str(tol)+ '_epms3_' + str(prob) + '_balance_' + str(use_balance_constraints) + '_cut1_' + str(cut1) + '_cut2_' + str(cut2) + '_PVI_' + str(cut3)  + '.csv')
         newFileWriter = csv.writer(newFile, lineterminator='\n')
         newFileWriter.writerow(['num_threads'])
         newFileWriter.writerow([no_threads])
@@ -700,7 +700,7 @@ if __name__ == "__main__":
     # List of tasks: [Model Name, Problem File Name, Number of Districts, Balance Tolerance, Use Balance Constraints, cut1, cut2, cut3]
     t_main_start = time.time() #TIME
     task_list = [
-        ["EpM_Cut_Empty", "CARP_K14_g_graph.dat", 100, 0.01, False, False, False, False]
+        ["EPM_new", "CARP_K14_g_graph.dat", 100, 0.01, False, False, False, False]
         # Add more tasks here as needed
     ]
 
